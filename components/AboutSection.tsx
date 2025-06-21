@@ -1,0 +1,142 @@
+"use client";
+
+import Image from 'next/image';
+import React, { useState } from 'react';
+
+const AboutSection = () => {
+  const [isHovering, setIsHovering] = useState(false);
+
+  const features = [
+    { icon: '🔒', title: 'Safe & Secure', description: 'Liquidity locked, contract renounced' },
+    { icon: '🚀', title: 'Moon Potential', description: '100x growth potential with strong community' },
+    { icon: '🧹', title: 'Cleaning Meme', description: 'First cleaning-themed meme coin in the space' },
+    { icon: '💰', title: 'Tokenomics', description: '2% buy/sell tax, 50% burned at launch' },
+  ];
+
+  return (
+    <div className="w-full py-48 md:py-64 relative z-10 min-h-screen overflow-hidden">
+      {/* Hand image positioned absolutely to the section */}
+      <div className="absolute right-0 bottom-0 z-20">
+        <Image 
+          src="/hand.svg" 
+          alt="Hand" 
+          width={900} 
+          height={900}
+          className="block"
+          priority
+        />
+      </div>
+      {/* Removed max-width constraint to allow full width usage */}
+      <div className="w-full mx-auto">
+        <div className="text-center mb-32 relative">
+          <div className="inline-flex items-center">
+            {/* ABOUT with amber color and black outline */}
+            <div className="inline-block">
+              <h2 className="text-4xl md:text-5xl uppercase tracking-wide font-bold relative" style={{ fontFamily: 'var(--font-press-start)' }}>
+                {/* Black outline effect */}
+                <span className="absolute text-black" style={{ left: '-2px', top: '0' }}>ABOUT</span>
+                <span className="absolute text-black" style={{ left: '2px', top: '0' }}>ABOUT</span>
+                <span className="absolute text-black" style={{ left: '0', top: '-2px' }}>ABOUT</span>
+                <span className="absolute text-black" style={{ left: '0', top: '2px' }}>ABOUT</span>
+                <span className="absolute text-black" style={{ left: '-2px', top: '-2px' }}>ABOUT</span>
+                <span className="absolute text-black" style={{ left: '2px', top: '-2px' }}>ABOUT</span>
+                <span className="absolute text-black" style={{ left: '-2px', top: '2px' }}>ABOUT</span>
+                <span className="absolute text-black" style={{ left: '2px', top: '2px' }}>ABOUT</span>
+                
+                {/* Diagonal shadow to the right */}
+                <span className="absolute text-black" style={{ left: '6px', top: '6px' }}>ABOUT</span>
+                
+                {/* Main amber text */}
+                <span className="relative z-10 text-amber-500">ABOUT</span>
+              </h2>
+            </div>
+            
+            {/* BUBU with amber color and black outline - in the same line */}
+            <div className="inline-block ml-4">
+              <h2 className="text-4xl md:text-5xl uppercase tracking-wide font-bold relative" style={{ fontFamily: 'var(--font-press-start)' }}>
+                {/* Black outline effect */}
+                <span className="absolute text-black" style={{ left: '-2px', top: '0' }}>BUBU</span>
+                <span className="absolute text-black" style={{ left: '2px', top: '0' }}>BUBU</span>
+                <span className="absolute text-black" style={{ left: '0', top: '-2px' }}>BUBU</span>
+                <span className="absolute text-black" style={{ left: '0', top: '2px' }}>BUBU</span>
+                <span className="absolute text-black" style={{ left: '-2px', top: '-2px' }}>BUBU</span>
+                <span className="absolute text-black" style={{ left: '2px', top: '-2px' }}>BUBU</span>
+                <span className="absolute text-black" style={{ left: '-2px', top: '2px' }}>BUBU</span>
+                <span className="absolute text-black" style={{ left: '2px', top: '2px' }}>BUBU</span>
+                
+                {/* Diagonal shadow to the right */}
+                <span className="absolute text-black" style={{ left: '6px', top: '6px' }}>BUBU</span>
+                
+                {/* Main amber text */}
+                <span className="relative z-10 text-amber-500">BUBU</span>
+              </h2>
+            </div>
+          </div>
+        </div>
+        
+        {/* Changed to allow more flexible layout with more space for images */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-16">
+          <div className="w-full md:w-1/2 mb-12 md:mb-0">
+            {/* Pixel art style card with black border */}
+            <div className="relative ml-[20%] bg-amber-500 p-8 border-4 border-black">
+              {/* Black shadow for 3D effect */}
+              <div className="absolute inset-0 bg-black translate-x-4 translate-y-4 -z-10"></div>
+              
+              {/* Card content */}
+              <h3 className="text-3xl font-bold mb-8 relative" style={{ fontFamily: 'var(--font-press-start)' }}>
+                {/* Black outline effect */}
+                <span className="absolute text-black" style={{ left: '-2px', top: '0' }}>The BUBU Story</span>
+                <span className="absolute text-black" style={{ left: '2px', top: '0' }}>The BUBU Story</span>
+                <span className="absolute text-black" style={{ left: '0', top: '-2px' }}>The BUBU Story</span>
+                <span className="absolute text-black" style={{ left: '0', top: '2px' }}>The BUBU Story</span>
+                <span className="absolute text-black" style={{ left: '-2px', top: '-2px' }}>The BUBU Story</span>
+                <span className="absolute text-black" style={{ left: '2px', top: '-2px' }}>The BUBU Story</span>
+                <span className="absolute text-black" style={{ left: '-2px', top: '2px' }}>The BUBU Story</span>
+                <span className="absolute text-black" style={{ left: '2px', top: '2px' }}>The BUBU Story</span>
+                
+                {/* Diagonal shadow to the right */}
+                <span className="absolute text-black" style={{ left: '6px', top: '6px' }}>The BUBU Story</span>
+                
+                {/* Main white text */}
+                <span className="relative z-10 text-white">The BUBU Story</span>
+              </h3>
+              
+              {/* Description field with pixel art border */}
+              <div className="relative mb-12">
+                <div className="absolute inset-0 bg-black translate-x-2 translate-y-2 -z-10"></div>
+                <div 
+                  className="w-full h-72 p-6 border-4 border-black bg-amber-100 text-black overflow-y-auto"
+                  style={{ fontFamily: 'var(--font-press-start)' }}
+                >
+                  <p className="text-sm leading-relaxed">
+                    BUBU is a revolutionary cleaning meme coin designed to transform the crypto space! Born from the idea that the crypto market needs some cleaning up, BUBU combines humor with real utility.
+                  </p>
+                  <p className="text-sm leading-relaxed mt-4">
+                    With innovative tokenomics and a strong community focus, BUBU aims to sweep away the competition and mop up the floor with other meme coins. Join the cleaning revolution today!
+                  </p>
+                </div>
+              </div>
+              
+              {/* Action button */}
+              <div className="flex justify-center mt-8">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-black translate-x-2 translate-y-2"></div>
+                  <button className="relative z-10 bg-amber-100 border-4 border-black px-8 py-4 text-black font-bold uppercase" style={{ fontFamily: 'var(--font-press-start)' }}>
+                    FOLLOW ME
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Image section - increased width for portrait images */}
+          <div className="w-full md:w-1/2 relative">
+            {/* Space for additional content if needed */}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AboutSection;
