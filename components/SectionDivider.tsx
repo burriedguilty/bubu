@@ -27,7 +27,7 @@ const SectionDivider: React.FC<SectionDividerProps> = ({
   const textColorClass = 'text-white';
   
   return (
-    <div className="relative py-6" style={{ backgroundColor }}>
+    <div className="relative py-3 sm:py-4 md:py-6" style={{ backgroundColor }}>
       {/* Simple yellow background with borders */}
       <div className="absolute inset-0 bg-amber-500 border-y-4 border-black" />
 
@@ -48,31 +48,31 @@ const SectionDivider: React.FC<SectionDividerProps> = ({
           {items.map((item, index) => (
             <div key={index} className="relative">
               {/* Multiple text shadows to create outline effect */}
-              <span className="absolute text-black text-xl uppercase tracking-wide font-bold" style={{ left: '-2px', top: '0px' }}>{item}</span>
-              <span className="absolute text-black text-xl uppercase tracking-wide font-bold" style={{ left: '2px', top: '0px' }}>{item}</span>
-              <span className="absolute text-black text-xl uppercase tracking-wide font-bold" style={{ left: '0px', top: '-2px' }}>{item}</span>
-              <span className="absolute text-black text-xl uppercase tracking-wide font-bold" style={{ left: '0px', top: '2px' }}>{item}</span>
-              <span className="absolute text-black text-xl uppercase tracking-wide font-bold" style={{ left: '-2px', top: '-2px' }}>{item}</span>
-              <span className="absolute text-black text-xl uppercase tracking-wide font-bold" style={{ left: '2px', top: '-2px' }}>{item}</span>
-              <span className="absolute text-black text-xl uppercase tracking-wide font-bold" style={{ left: '-2px', top: '2px' }}>{item}</span>
-              <span className="absolute text-black text-xl uppercase tracking-wide font-bold" style={{ left: '2px', top: '2px' }}>{item}</span>
+              <span className="absolute text-black text-sm sm:text-lg md:text-xl uppercase tracking-wide font-bold" style={{ left: '-2px', top: '0px' }}>{item}</span>
+              <span className="absolute text-black text-sm sm:text-lg md:text-xl uppercase tracking-wide font-bold" style={{ left: '2px', top: '0px' }}>{item}</span>
+              <span className="absolute text-black text-sm sm:text-lg md:text-xl uppercase tracking-wide font-bold" style={{ left: '0px', top: '-2px' }}>{item}</span>
+              <span className="absolute text-black text-sm sm:text-lg md:text-xl uppercase tracking-wide font-bold" style={{ left: '0px', top: '2px' }}>{item}</span>
+              <span className="absolute text-black text-sm sm:text-lg md:text-xl uppercase tracking-wide font-bold" style={{ left: '-2px', top: '-2px' }}>{item}</span>
+              <span className="absolute text-black text-sm sm:text-lg md:text-xl uppercase tracking-wide font-bold" style={{ left: '2px', top: '-2px' }}>{item}</span>
+              <span className="absolute text-black text-sm sm:text-lg md:text-xl uppercase tracking-wide font-bold" style={{ left: '-2px', top: '2px' }}>{item}</span>
+              <span className="absolute text-black text-sm sm:text-lg md:text-xl uppercase tracking-wide font-bold" style={{ left: '2px', top: '2px' }}>{item}</span>
               {/* Main text */}
-              <span className={`${textColorClass} relative text-xl uppercase tracking-wide font-bold`}>{item}</span>
+              <span className={`${textColorClass} relative text-sm sm:text-lg md:text-xl uppercase tracking-wide font-bold`}>{item}</span>
             </div>
           ))}
           {items.map((item, index) => (
             <div key={`repeat-${index}`} className="relative">
               {/* Multiple text shadows to create outline effect */}
-              <span className="absolute text-black text-xl uppercase tracking-wide font-bold" style={{ left: '-2px', top: '0px' }}>{item}</span>
-              <span className="absolute text-black text-xl uppercase tracking-wide font-bold" style={{ left: '2px', top: '0px' }}>{item}</span>
-              <span className="absolute text-black text-xl uppercase tracking-wide font-bold" style={{ left: '0px', top: '-2px' }}>{item}</span>
-              <span className="absolute text-black text-xl uppercase tracking-wide font-bold" style={{ left: '0px', top: '2px' }}>{item}</span>
-              <span className="absolute text-black text-xl uppercase tracking-wide font-bold" style={{ left: '-2px', top: '-2px' }}>{item}</span>
-              <span className="absolute text-black text-xl uppercase tracking-wide font-bold" style={{ left: '2px', top: '-2px' }}>{item}</span>
-              <span className="absolute text-black text-xl uppercase tracking-wide font-bold" style={{ left: '-2px', top: '2px' }}>{item}</span>
-              <span className="absolute text-black text-xl uppercase tracking-wide font-bold" style={{ left: '2px', top: '2px' }}>{item}</span>
+              <span className="absolute text-black text-sm sm:text-lg md:text-xl uppercase tracking-wide font-bold" style={{ left: '-2px', top: '0px' }}>{item}</span>
+              <span className="absolute text-black text-sm sm:text-lg md:text-xl uppercase tracking-wide font-bold" style={{ left: '2px', top: '0px' }}>{item}</span>
+              <span className="absolute text-black text-sm sm:text-lg md:text-xl uppercase tracking-wide font-bold" style={{ left: '0px', top: '-2px' }}>{item}</span>
+              <span className="absolute text-black text-sm sm:text-lg md:text-xl uppercase tracking-wide font-bold" style={{ left: '0px', top: '2px' }}>{item}</span>
+              <span className="absolute text-black text-sm sm:text-lg md:text-xl uppercase tracking-wide font-bold" style={{ left: '-2px', top: '-2px' }}>{item}</span>
+              <span className="absolute text-black text-sm sm:text-lg md:text-xl uppercase tracking-wide font-bold" style={{ left: '2px', top: '-2px' }}>{item}</span>
+              <span className="absolute text-black text-sm sm:text-lg md:text-xl uppercase tracking-wide font-bold" style={{ left: '-2px', top: '2px' }}>{item}</span>
+              <span className="absolute text-black text-sm sm:text-lg md:text-xl uppercase tracking-wide font-bold" style={{ left: '2px', top: '2px' }}>{item}</span>
               {/* Main text */}
-              <span className={`${textColorClass} relative text-xl uppercase tracking-wide font-bold`}>{item}</span>
+              <span className={`${textColorClass} relative text-sm sm:text-lg md:text-xl uppercase tracking-wide font-bold`}>{item}</span>
             </div>
           ))}
         </motion.div>

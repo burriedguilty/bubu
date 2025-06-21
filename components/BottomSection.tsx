@@ -16,7 +16,7 @@ const BottomSection = () => {
   });
   
   return (
-    <footer className="w-full py-96 min-h-[200vh] relative z-10 overflow-visible">
+    <footer className="w-full py-48 sm:py-64 md:py-96 min-h-[150vh] sm:min-h-[180vh] md:min-h-[200vh] relative z-10 overflow-visible">
       {/* Single cloud layer covering the entire section */}
       <div className="absolute inset-0 z-5">
         <AnimatedClouds />
@@ -110,15 +110,17 @@ const BottomSection = () => {
             width={drop.size}
             height={drop.size}
             style={{ 
-              width: '150%',
-              height: '150%',
+              width: '100%',
+              height: '100%',
+              maxWidth: '150%',
+              maxHeight: '150%',
             }}
           />
         </div>
       ))}
       
       {/* Additional content area */}
-      <div className="max-w-7xl mx-auto px-8 h-full flex flex-col justify-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 h-full flex flex-col justify-center">
         <div className="mb-80">
           {/* Empty space for future content */}
         </div>
@@ -135,7 +137,7 @@ const BottomSection = () => {
             alt="Character" 
             width={500}
             height={500}
-            className="h-auto" 
+            className="h-auto w-[250px] sm:w-[350px] md:w-[450px] lg:w-[500px]" 
             style={{ 
               display: 'block'
             }}

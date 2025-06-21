@@ -8,12 +8,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 const HeroSection = () => {
   const [showToast, setShowToast] = useState(false);
   return (
-    <div className="relative w-full p-8 min-h-[100vh] flex flex-col justify-center items-center" style={{ fontFamily: 'var(--font-press-start)' }}>
+    <div className="relative w-full p-4 sm:p-6 md:p-8 min-h-[100vh] flex flex-col justify-center items-center" style={{ fontFamily: 'var(--font-press-start)' }}>
       {/* Animated clouds background with dithered effect */}
       <AnimatedClouds />
 
       {/* Social media link in top left corner */}
-      <div className="absolute top-6 left-6 z-10 hover-scale">
+      <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-10 hover-scale">
         <a href="https://x.com" target="_blank" rel="noopener noreferrer">
           {/* SVG filter definition for white outline */}
           <svg width="0" height="0" className="absolute">
@@ -28,9 +28,9 @@ const HeroSection = () => {
           <Image 
             src="/X.svg" 
             alt="X Social Media" 
-            width={70} 
-            height={70} 
-            className="text-white"
+            width={50} 
+            height={50} 
+            className="text-white sm:w-[60px] sm:h-[60px] md:w-[70px] md:h-[70px]"
             style={{ filter: 'url(#white-outline)' }}
           />
         </a>
@@ -38,14 +38,14 @@ const HeroSection = () => {
 
       {/* Center logo with glow effect */}
       <div className="flex flex-col items-center justify-center py-16 z-10 mt-8">
-        <div className="w-full max-w-2xl mb-12">
+        <div className="w-full max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-2xl mb-8 md:mb-12">
           <div className="relative">
             <Image 
               src="/bubu.svg" 
               alt="BuBu Logo" 
               width={400} 
               height={150}
-              className="mx-auto relative pulse"
+              className="mx-auto relative pulse w-full h-auto"
               priority
             />
           </div>
@@ -54,7 +54,7 @@ const HeroSection = () => {
         {/* Contract address with copy to clipboard functionality - Pixel Art Style */}
         <div className="mt-12 w-full flex flex-col items-center">
           <div 
-            className="relative cursor-pointer inline-flex py-3 px-4 text-sm bg-white border-4 border-black items-center justify-center shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all duration-200"
+            className="relative cursor-pointer inline-flex py-2 px-3 sm:py-3 sm:px-4 text-xs sm:text-sm bg-white border-4 border-black items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all duration-200 max-w-full overflow-hidden"
             onClick={() => {
               const contractAddress = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
               navigator.clipboard.writeText(contractAddress)
@@ -67,7 +67,7 @@ const HeroSection = () => {
                 });
             }}
           >
-            <span className="text-black">
+            <span className="text-black text-xs sm:text-sm truncate max-w-[200px] sm:max-w-[250px] md:max-w-full">
               0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
             </span>
             <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -96,11 +96,11 @@ const HeroSection = () => {
           </AnimatePresence>
           
           {/* Pixel Art Style Buttons */}
-          <div className="flex justify-center mt-8 gap-8">
-            <button className="px-8 py-4 bg-amber-500 text-white font-bold text-sm border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all duration-200 uppercase tracking-wide">
+          <div className="flex flex-col sm:flex-row justify-center mt-6 sm:mt-8 gap-4 sm:gap-8">
+            <button className="px-6 sm:px-8 py-3 sm:py-4 bg-amber-500 text-white font-bold text-xs sm:text-sm border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all duration-200 uppercase tracking-wide w-full sm:w-auto">
               Buy Now
             </button>
-            <button className="px-8 py-4 bg-amber-500 text-white font-bold text-sm border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all duration-200 uppercase tracking-wide">
+            <button className="px-6 sm:px-8 py-3 sm:py-4 bg-amber-500 text-white font-bold text-xs sm:text-sm border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all duration-200 uppercase tracking-wide w-full sm:w-auto">
               View Chart
             </button>
           </div>
