@@ -18,7 +18,7 @@ interface CloudLayerConfig {
 const CLOUD_LAYERS: Record<'FOREGROUND' | 'MIDGROUND' | 'BACKGROUND', CloudLayerConfig> = {
   FOREGROUND: {
     count: 6,
-    sizeRange: [0.4, 0.8],
+    sizeRange: [0.3, 0.6],
     speedRange: [80, 120],
     opacityRange: [0.9, 1.0],
     floatRange: [10, 20],
@@ -26,8 +26,8 @@ const CLOUD_LAYERS: Record<'FOREGROUND' | 'MIDGROUND' | 'BACKGROUND', CloudLayer
     blur: 0,
   },
   MIDGROUND: {
-    count: 8,
-    sizeRange: [0.2, 0.5],
+    count: 6,
+    sizeRange: [0.15, 0.4],
     speedRange: [50, 80],
     opacityRange: [0.7, 0.9],
     floatRange: [5, 15],
@@ -35,8 +35,8 @@ const CLOUD_LAYERS: Record<'FOREGROUND' | 'MIDGROUND' | 'BACKGROUND', CloudLayer
     blur: 0.5,
   },
   BACKGROUND: {
-    count: 10,
-    sizeRange: [0.03, 0.15],
+    count: 8,
+    sizeRange: [0.03, 0.12],
     speedRange: [30, 50],
     opacityRange: [0.2, 0.5],
     floatRange: [2, 5],
@@ -97,6 +97,7 @@ const Cloud = memo(({ cloud, config }: { cloud: CloudProps; config: CloudLayerCo
           alt="Cloud"
           width={300}
           height={150}
+          className="w-full h-auto"
           priority={cloud.isInitial}
           loading={cloud.isInitial ? "eager" : "lazy"}
           style={{ 
@@ -123,6 +124,7 @@ Cloud.displayName = 'Cloud';
 
 const AnimatedClouds: React.FC = () => {
   const [clouds, setClouds] = useState<CloudProps[]>([]);
+  const [windowWidth, setWindowWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 1024);
   const cloudCountRef = useRef(0);
   const spawnIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastSpawnTimeRef = useRef(Date.now());
@@ -179,22 +181,46 @@ const AnimatedClouds: React.FC = () => {
     };
   };
 
+  // Handle window resize for responsiveness
   useEffect(() => {
-    // Initialize clouds for each layer based on their configuration
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Adjust cloud count based on screen size
+  const getAdjustedCloudCount = (baseCount: number): number => {
+    if (windowWidth < 640) { // Small mobile
+      return Math.max(Math.floor(baseCount * 0.5), 2); // Reduce clouds on small screens
+    } else if (windowWidth < 768) { // Mobile
+      return Math.max(Math.floor(baseCount * 0.7), 3);
+    } else if (windowWidth < 1024) { // Tablet
+      return Math.max(Math.floor(baseCount * 0.85), 4);
+    }
+    return baseCount; // Desktop - use full count
+  };
+
+  useEffect(() => {
+    // Initialize clouds for each layer based on their configuration and screen size
     const initialClouds: CloudProps[] = [];
     Object.entries(CLOUD_LAYERS).forEach(([layer, config]) => {
       const layerType = layer as 'FOREGROUND' | 'MIDGROUND' | 'BACKGROUND';
-      for (let i = 0; i < config.count; i++) {
+      const adjustedCount = getAdjustedCloudCount(config.count);
+      for (let i = 0; i < adjustedCount; i++) {
         initialClouds.push(createCloud(true, layerType));
       }
     });
     setClouds(initialClouds);
 
     // Track target counts for each layer - this is how many clouds should be visible at once
+    // Adjust based on screen size
     const targetCounts = {
-      FOREGROUND: CLOUD_LAYERS.FOREGROUND.count,
-      MIDGROUND: CLOUD_LAYERS.MIDGROUND.count,
-      BACKGROUND: CLOUD_LAYERS.BACKGROUND.count
+      FOREGROUND: getAdjustedCloudCount(CLOUD_LAYERS.FOREGROUND.count),
+      MIDGROUND: getAdjustedCloudCount(CLOUD_LAYERS.MIDGROUND.count),
+      BACKGROUND: getAdjustedCloudCount(CLOUD_LAYERS.BACKGROUND.count)
     };
     
     // Simple function to ensure proper cloud cycling
@@ -215,7 +241,8 @@ const AnimatedClouds: React.FC = () => {
         });
         
         // Fix: Cap the number of clouds to avoid performance issues
-        const maxClouds = 50;
+        // Adjust max clouds based on screen size
+        const maxClouds = windowWidth < 640 ? 20 : windowWidth < 1024 ? 35 : 50;
         if (visibleClouds.length > maxClouds) {
           const initialClouds = visibleClouds.filter(c => c.isInitial);
           const dynamicClouds = visibleClouds.filter(c => !c.isInitial)

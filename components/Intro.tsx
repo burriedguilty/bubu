@@ -10,14 +10,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 const Intro: React.FC = () => {
   // State to track if intro has been clicked
   const [introComplete, setIntroComplete] = useState(false);
+  const [mounted, setMounted] = useState(false);
   
-  // While developing, always show the intro screen
+  // Handle component mount
   useEffect(() => {
-    // Reset the localStorage key during development
+    setMounted(true);
+    
+    // For development, uncomment to always show intro
     localStorage.removeItem('bubu_visited');
     
+    // Check if user has visited before
+    const hasVisited = localStorage.getItem('bubu_visited') === 'true';
+    if (hasVisited) {
+      setIntroComplete(true);
+    }
+    
     // Disable scrolling while in intro mode
-    if (!introComplete) {
+    if (!hasVisited) {
       document.body.style.overflow = 'hidden';
     }
     
@@ -25,7 +34,7 @@ const Intro: React.FC = () => {
       // Re-enable scrolling when component unmounts
       document.body.style.overflow = '';
     };
-  }, [introComplete]);
+  }, []);
 
   // Handle click on the intro screen
   const handleIntroClick = () => {
@@ -40,55 +49,33 @@ const Intro: React.FC = () => {
   return (
     <>
       {/* Intro overlay - only shown when intro is not complete */}
-      <AnimatePresence>
-        {!introComplete && (
-          <motion.div 
-            className="fixed inset-0 z-[100] cursor-pointer overflow-hidden bg-black" 
-            onClick={handleIntroClick}
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <SkyBackground>
-              <div className="min-h-screen flex items-center justify-center">
-                {/* Animated clouds in the background */}
-                <AnimatedClouds />
-                
-                {/* Centered large BuBu logo with animation */}
-                <motion.div 
-                  className="z-20 relative"
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1.5, opacity: 1 }}
-                  transition={{ 
-                    duration: 0.8, 
-                    ease: "easeOut",
-                    delay: 0.3
-                  }}
-                >
-                  <Image 
-                    src="/bubu.svg" 
-                    alt="BuBu Logo" 
-                    width={900}  
-                    height={350}
-                    className="mx-auto"
-                    priority
-                  />
-                </motion.div>
+      {mounted && !introComplete && (
+        <div className="fixed inset-0 z-[100] cursor-pointer overflow-hidden bg-black" onClick={handleIntroClick}>
+          <SkyBackground>
+            <div className="min-h-screen flex items-center justify-center">
+              {/* Animated clouds in the background */}
+              <AnimatedClouds />
+              
+              {/* Centered large BuBu logo with animation */}
+              <div className="z-20 relative w-full px-4 sm:px-8 md:px-12 animate-fadeIn">
+                <Image 
+                  src="/bubu.svg" 
+                  alt="BuBu Logo" 
+                  width={900}  
+                  height={350}
+                  className="mx-auto w-full max-w-[300px] sm:max-w-[450px] md:max-w-[600px] lg:max-w-[900px] h-auto animate-scaleIn"
+                  priority
+                />
               </div>
-            </SkyBackground>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </div>
+          </SkyBackground>
+        </div>
+      )}
 
-      {/* Always render HeroSection, but it's hidden behind the intro overlay until intro is complete */}
-      <motion.div
-        initial={{ opacity: introComplete ? 1 : 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
+      {/* Always render HeroSection */}
+      <div style={{ display: mounted && !introComplete ? 'none' : 'block' }}>
         <HeroSection />
-      </motion.div>
+      </div>
     </>
   );
 };

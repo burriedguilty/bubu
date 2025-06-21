@@ -16,6 +16,26 @@ module.exports = {
         'gradient-conic':
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
+      animation: {
+        'fadeIn': 'fadeIn 1s ease-in-out',
+        'scaleIn': 'scaleIn 1.2s ease-out',
+        'float': 'float 6s ease-in-out infinite',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        scaleIn: {
+          '0%': { transform: 'scale(0.8)', opacity: '0' },
+          '50%': { transform: 'scale(1.2)', opacity: '1' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-20px)' },
+        },
+      },
     },
   },
   plugins: [],
