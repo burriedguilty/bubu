@@ -16,18 +16,19 @@ const AboutSection = () => {
   return (
     <div className="w-full py-24 sm:py-32 md:py-48 lg:py-64 relative z-10 min-h-screen overflow-hidden">
       {/* Hand image positioned absolutely to the section */}
-      <div className="absolute right-0 bottom-0 z-20 w-[60%] sm:w-[50%] md:w-[40%] lg:w-auto">
+      <div className="absolute right-0 bottom-0 z-20 w-[45%] sm:w-[40%] md:w-[35%] lg:w-[30%]">
         <Image 
           src="/hand.svg" 
           alt="Hand" 
           width={900} 
           height={900}
           className="block w-full h-auto"
+          style={{ transform: 'translateX(20%)' }}
           priority
         />
       </div>
       {/* Removed max-width constraint to allow full width usage */}
-      <div className="w-full mx-auto">
+      <div className="w-full">
         <div className="text-center mb-16 sm:mb-20 md:mb-32 relative">
           <div className="inline-flex items-center flex-wrap justify-center">
             {/* ABOUT with amber color and black outline */}
@@ -75,10 +76,10 @@ const AboutSection = () => {
         </div>
         
         {/* Changed to allow more flexible layout with more space for images */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-16 px-4 sm:px-8">
-          <div className="w-full md:w-1/2 mb-12 md:mb-0">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-16 px-4 sm:px-8 md:px-12 lg:px-16">
+          <div className="w-full md:w-3/5 mb-12 md:mb-0">
             {/* Pixel art style card with black border */}
-            <div className="relative ml-[5%] sm:ml-[10%] md:ml-[20%] bg-amber-500 p-4 sm:p-6 md:p-8 border-4 border-black">
+            <div className="relative ml-4 sm:ml-8 md:ml-12 bg-amber-500 p-4 sm:p-6 md:p-8 border-4 border-black">
               {/* Black shadow for 3D effect */}
               <div className="absolute inset-0 bg-black translate-x-4 translate-y-4 -z-10"></div>
               
@@ -129,8 +130,8 @@ const AboutSection = () => {
             </div>
           </div>
           
-          {/* Image section - increased width for portrait images */}
-          <div className="w-full md:w-1/2 relative">
+          {/* Image section - adjusted width */}
+          <div className="w-full md:w-2/5 relative">
             {/* Space for additional content if needed */}
           </div>
         </div>

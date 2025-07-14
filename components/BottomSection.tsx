@@ -1,25 +1,57 @@
 "use client";
 
 import Image from 'next/image';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import AnimatedClouds from './AnimatedClouds';
+import Masonry from './Masonry';
+
+const useGalleryImages = () => {
+  const [images, setImages] = useState<{ id: string; img: string }[]>([]);
+
+  useEffect(() => {
+    // Get all images from 1 to 6
+    const galleryImages = Array.from({ length: 6 }, (_, i) => ({
+      id: String(i + 1),
+      img: `/gallery/${i + 1}.jpg`
+    }));
+    setImages(galleryImages);
+  }, []);
+
+  return images;
+};
 
 const BottomSection = () => {
+  const galleryImages = useGalleryImages();
   // Create an array of money drops with random positions and delays
-  const moneyDrops = Array.from({ length: 15 }, (_, index) => {
+  const moneyDrops = Array.from({ length: 20 }, (_, index) => {
     const leftPosition = Math.floor(Math.random() * 90) + 5; // 5% to 95%
     const animationDelay = Math.random() * 10; // 0 to 10s delay
-    const animationDuration = 12 + Math.random() * 10; // 12-22s duration (longer for taller area)
+    const animationDuration = 8 + Math.random() * 6; // 8-14s duration
     const size = 60 + Math.floor(Math.random() * 60); // 60-120px (larger size)
     
     return { id: index, leftPosition, animationDelay, animationDuration, size };
   });
   
   return (
-    <footer className="w-full py-48 sm:py-64 md:py-96 min-h-[150vh] sm:min-h-[180vh] md:min-h-[200vh] relative z-10 overflow-visible">
+    <footer className="w-full py-24 sm:py-32 md:py-48 min-h-[150vh] sm:min-h-[180vh] md:min-h-[200vh] relative z-10 overflow-visible">
       {/* Single cloud layer covering the entire section */}
       <div className="absolute inset-0 z-5">
         <AnimatedClouds />
+      </div>
+
+      {/* Gallery Section */}
+      <div className="relative z-20 -mt-12 sm:-mt-16 md:-mt-24 px-4 sm:px-6 lg:px-8 pb-12 sm:pb-16 md:pb-24">
+        <Masonry
+          items={galleryImages}
+          ease="power3.out"
+          duration={0.6}
+          stagger={0.05}
+          animateFrom="bottom"
+          scaleOnHover={true}
+          hoverScale={0.95}
+          blurToFocus={true}
+          colorShiftOnHover={false}
+        />
       </div>
       
       {/* Combined styles for all animations */}
@@ -27,37 +59,34 @@ const BottomSection = () => {
         /* Money falling animation */
         @keyframes fall {
           0% { 
-            transform: translateY(-100px); 
+            transform: translateY(0); 
             opacity: 0;
           }
           10% {
             opacity: 1;
           }
-          20% { 
+          30% { 
             transform: translateY(40vh) translateX(100px); 
           }
-          40% { 
+          50% { 
             transform: translateY(80vh) translateX(-100px); 
           }
-          60% { 
+          70% { 
             transform: translateY(120vh) translateX(80px); 
           }
-          80% { 
+          90% { 
             transform: translateY(160vh) translateX(-50px); 
             opacity: 1;
           }
-          95% {
-            opacity: 0.5;
-          }
           100% { 
-            transform: translateY(200vh) translateX(30px); 
+            transform: translateY(180vh) translateX(30px); 
             opacity: 0;
           }
         }
         
         .money-drop {
           position: absolute;
-          top: -100px;
+          top: 60vh;
           z-index: 5;
           will-change: transform;
         }
@@ -118,13 +147,6 @@ const BottomSection = () => {
           />
         </div>
       ))}
-      
-      {/* Additional content area */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 h-full flex flex-col justify-center">
-        <div className="mb-80">
-          {/* Empty space for future content */}
-        </div>
-      </div>
       
       {/* Character image positioned above the hill with levitation effect */}
       <div 

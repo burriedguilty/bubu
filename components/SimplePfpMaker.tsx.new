@@ -1,0 +1,483 @@
+"use client";
+
+import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Import asset configurations from separate files - use relative paths
+import { backgroundAssets } from './pfp/BackgroundAssets';
+import { bodyAssets } from './pfp/BodyAssets';
+import { eyeAssets } from './pfp/EyeAssets';
+import { hatAssets } from './pfp/HatAssets';
+import { mouthAssets } from './pfp/MouthAssets';
+
+// Asset types and interfaces
+type AssetCategory = 'bg' | 'body' | 'eye' | 'hat' | 'mouth';
+
+interface Asset {
+  name: string;
+  path: string;
+  loaded: boolean;
+  image: HTMLImageElement | null;
+}
+
+interface Assets {
+  bg: Asset[];
+  body: Asset[];
+  eye: Asset[];
+  hat: Asset[];
+  mouth: Asset[];
+}
+
+interface Selections {
+  bg: number;
+  body: number;
+  eye: number;
+  hat: number;
+  mouth: number;
+}
+
+interface EquippedState {
+  eye: boolean;
+  mouth: boolean;
+  hat: boolean;
+}
+
+interface SimplePfpMakerProps {
+  className?: string;
+  width?: number;
+  height?: number;
+  onSave?: (canvas: HTMLCanvasElement) => void;
+  randomizeOnMount?: boolean;
+}
+
+// Define the ref type
+export interface SimplePfpMakerRef {
+  randomize: () => void;
+}
+
+// Combine imported assets into a single structure and filter out empty URLs
+const CLOUDINARY_ASSETS = {
+  bg: backgroundAssets.filter(asset => asset.url && asset.url.trim() !== ''),
+  body: bodyAssets.filter(asset => asset.url && asset.url.trim() !== ''),
+  eye: eyeAssets.filter(asset => asset.url && asset.url.trim() !== ''),
+  hat: hatAssets.filter(asset => asset.url && asset.url.trim() !== ''),
+  mouth: mouthAssets.filter(asset => asset.url && asset.url.trim() !== '')
+};
+
+const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({ 
+  className, 
+  width = 700, 
+  onSave, 
+  randomizeOnMount = false 
+}, ref) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  // Initialize assets state
+  const [assets, setAssets] = useState<Assets>({
+    bg: [],
+    body: [],
+    eye: [],
+    hat: [],
+    mouth: []
+  });
+  
+  // Track which assets are selected
+  const [selections, setSelections] = useState<Selections>({
+    bg: 0,
+    body: 0,
+    eye: 0,
+    hat: 0,
+    mouth: 0
+  });
+
+  // State for equipped (visible) elements
+  const [equipped, setEquipped] = useState<EquippedState>({
+    eye: true,
+    mouth: true,
+    hat: true
+  });
+  
+  // State for showing save notification
+  const [showSaveNotification, setShowSaveNotification] = useState(false);
+  
+  // Loading state
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Helper function to load an image and return a Promise with enhanced error handling
+  const loadImage = (src: string): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+      console.log(`🔄 Starting to load image from: ${src}`);
+      
+      const img = new Image();
+      img.crossOrigin = 'anonymous'; // Important for Cloudinary
+      
+      img.onload = () => {
+        console.log(`✅ Successfully loaded image: ${src} (${img.width}x${img.height})`);
+        resolve(img);
+      };
+      
+      img.onerror = (event) => {
+        console.error(`❌ Failed to load image: ${src}`, event);
+        // Try to fetch the image to check for CORS or network issues
+        fetch(src, { mode: 'cors' })
+          .then(response => {
+            if (!response.ok) {
+              console.error(`❌ Fetch failed with status: ${response.status} ${response.statusText}`);
+              reject(new Error(`HTTP error ${response.status}: ${response.statusText}`));
+            } else {
+              console.error(`❌ Fetch succeeded but image loading failed. Possible image format issue.`);
+              reject(new Error('Image format not supported'));
+            }
+          })
+          .catch(error => {
+            console.error(`❌ Network error when fetching image: ${error.message}`);
+            reject(error);
+          });
+      };
+      
+      img.src = src;
+    });
+  };
+
+  // Load assets from Cloudinary with direct links
+  useEffect(() => {
+    console.log('Loading assets from Cloudinary...');
+    
+    const loadAssets = async () => {
+      try {
+        const categories: AssetCategory[] = ['bg', 'body', 'eye', 'hat', 'mouth'];
+        const newAssets: Assets = { bg: [], body: [], eye: [], hat: [], mouth: [] };
+        const newSelections: Selections = { bg: 0, body: 0, eye: 0, hat: 0, mouth: 0 };
+
+        for (const category of categories) {
+          console.log(`Loading category: ${category}`);
+          const validAssets = CLOUDINARY_ASSETS[category].filter(asset => asset.url && asset.url.trim() !== '');
+          console.log(`Category ${category}: Found ${validAssets.length} valid assets`);
+
+          for (const assetConfig of validAssets) {
+            try {
+              if (!assetConfig.url) {
+                console.log(`Skipping empty URL in ${category}`);
+                continue;
+              }
+              console.log(`Loading ${category}: ${assetConfig.name} from ${assetConfig.url}`);
+              const image = await loadImage(assetConfig.url);
+              newAssets[category].push({
+                name: assetConfig.name || `${category} ${newAssets[category].length + 1}`,
+                path: assetConfig.url,
+                loaded: true,
+                image
+              });
+              console.log(`✅ Loaded ${category}: ${assetConfig.name} successfully`);
+            } catch (error) {
+              console.error(`❌ Failed to load ${category}: ${assetConfig.name}: ${error}`);
+              // Don't add failed assets to prevent selection issues
+            }
+          }
+          console.log(`Finished loading ${category}. Total assets: ${newAssets[category].length}`);
+        }
+
+        console.log('Setting assets state with:', newAssets);
+        setAssets(newAssets);
+        
+        // Make sure selections are valid based on loaded assets
+        for (const category of categories) {
+          if (newAssets[category].length > 0) {
+            newSelections[category] = 0; // Default to first item if available
+          }
+        }
+        console.log('Setting initial selections:', newSelections);
+        
+        // Randomize immediately after assets are loaded
+        const randomSelections: Selections = { ...newSelections };
+        const assetCategories = ['bg', 'body', 'eye', 'hat', 'mouth'] as AssetCategory[];
+        
+        for (const category of assetCategories) {
+          const categoryAssets = newAssets[category];
+          if (categoryAssets && categoryAssets.length > 0) {
+            const randomIndex = Math.floor(Math.random() * categoryAssets.length);
+            randomSelections[category] = randomIndex;
+          }
+        }
+        
+        console.log('Randomized initial selections:', randomSelections);
+        setSelections(randomSelections);
+        
+        // Set loading to false when assets are loaded
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error in loadAssets:', error);
+        setIsLoading(false); // Set loading to false even on error
+      }
+    };
+
+    loadAssets();
+  }, []);
+  
+  // Update canvas when selections or assets change
+  useEffect(() => {
+    console.log('Redrawing canvas with selections:', selections);
+    console.log('Assets available:', assets);
+    
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      console.error('Canvas ref is null');
+      return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('Failed to get canvas context');
+      return;
+    }
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw asset helper function with improved error handling and logging
+    const drawAsset = (category: AssetCategory, index: number) => {
+      console.log(`Attempting to draw ${category} asset at index ${index}`);
+      
+      // Handle empty arrays
+      if (!assets[category] || assets[category].length === 0) {
+        console.warn(`No assets available for ${category}`);
+        return;
+      }
+      
+      // Handle index out of range
+      if (index >= assets[category].length) {
+        console.warn(`Index ${index} out of range for ${category}, max is ${assets[category].length - 1}`);
+        return;
+      }
+      
+      // Get the asset
+      const asset = assets[category][index];
+      
+      // Skip if asset isn't loaded properly
+      if (!asset || !asset.loaded || !asset.image) {
+        console.warn(`Asset ${category}[${index}] not properly loaded:`, asset);
+        return;
+      }
+      
+      console.log(`Drawing ${category}: ${asset.name}`);
+      try {
+        ctx.drawImage(asset.image, 0, 0, canvas.width, canvas.height);
+        console.log(`✅ Drew ${category}: ${asset.name} successfully`);
+      } catch (error) {
+        console.error(`❌ Error drawing ${category}: ${asset.name}:`, error);
+      }
+    };
+
+    // Draw all layers in order with console logging
+    console.log('Drawing layers in order: bg, body, eye, mouth, hat');
+    console.log('Equipped state:', equipped);
+    
+    // Draw each asset only if it exists, properly loaded, and equipped (for some)
+    if (assets.bg && assets.bg.length > 0 && selections.bg < assets.bg.length) {
+      drawAsset('bg', selections.bg);
+    }
+    
+    if (assets.body && assets.body.length > 0 && selections.body < assets.body.length) {
+      drawAsset('body', selections.body);
+    }
+    
+    // Only draw eyes if equipped
+    if (equipped.eye && assets.eye && assets.eye.length > 0 && selections.eye < assets.eye.length) {
+      drawAsset('eye', selections.eye);
+    }
+    
+    // Only draw mouth if equipped
+    if (equipped.mouth && assets.mouth && assets.mouth.length > 0 && selections.mouth < assets.mouth.length) {
+      drawAsset('mouth', selections.mouth);
+    }
+    
+    // Only draw hat if equipped
+    if (equipped.hat && assets.hat && assets.hat.length > 0 && selections.hat < assets.hat.length) {
+      drawAsset('hat', selections.hat);
+    }
+  }, [assets, selections, equipped, width]);
+
+  // Handle asset selection changes
+  const handleAssetChange = (category: AssetCategory, index: number) => {
+    setSelections(prev => ({
+      ...prev,
+      [category]: index
+    }));
+  };
+  
+  // Handle equip/unequip toggling
+  const handleEquipToggle = (category: keyof EquippedState) => {
+    setEquipped(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+    console.log(`Toggled ${category} to ${!equipped[category]}`);
+  };
+
+  // Handle saving
+  const handleSave = () => {
+    if (canvasRef.current) {
+      // Create a download link for the image with high quality
+      const imageUrl = canvasRef.current.toDataURL('image/png', 1.0);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = imageUrl;
+      downloadLink.download = 'bubu-pfp.png';
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      
+      // Show save notification
+      setShowSaveNotification(true);
+      setTimeout(() => setShowSaveNotification(false), 3000);
+      
+      // Also call the onSave callback if provided
+      if (onSave) {
+        onSave(canvasRef.current);
+      }
+    }
+  };
+
+  // Handle randomizing selections
+  const handleRandomize = () => {
+    if (!assets) return;
+    
+    const randomSelections: Selections = { ...selections };
+    const assetCategories = ['bg', 'body', 'eye', 'hat', 'mouth'] as AssetCategory[];
+    
+    for (const category of assetCategories) {
+      const categoryAssets = assets[category];
+      if (categoryAssets && categoryAssets.length > 0) {
+        const randomIndex = Math.floor(Math.random() * categoryAssets.length);
+        randomSelections[category] = randomIndex;
+      }
+    }
+    
+    console.log('Randomized selections:', randomSelections);
+    setSelections(randomSelections);
+  };
+  
+  // Expose the randomize function via ref
+  useImperativeHandle(ref, () => ({
+    randomize: handleRandomize
+  }));
+
+  return (
+    <div className={`pfp-maker ${className || ''}`} style={{ fontFamily: 'var(--font-press-start)' }}>
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center p-8 h-[400px]">
+          <div className="relative w-16 h-16 mb-4">
+            <div className="absolute top-0 left-0 w-full h-full border-8 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          <p className="text-black text-sm">Loading assets...</p>
+        </div>
+      ) : (
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Canvas */}
+          <div className="pfp-canvas-container relative" style={{ 
+            border: '4px solid black', 
+            boxShadow: '6px 6px 0px 0px rgba(0,0,0,1)',
+            width: `${width}px`,
+            height: `${width}px`,
+            aspectRatio: '1/1',
+            backgroundColor: 'white',
+            padding: '0',
+            margin: '0'
+          }}>
+            <canvas 
+              ref={canvasRef} 
+              width={width} 
+              height={width} 
+              className="absolute top-0 left-0 w-full h-full bg-white border-2 border-black"
+            />
+          </div>
+          
+          {/* Controls */}
+          <div className="pfp-controls flex-1 space-y-4 bg-amber-100/80 p-4">
+            {/* Asset Selection */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {Object.keys(assets).map((category) => {
+                const categoryAssets = assets[category as AssetCategory];
+                const selectedIndex = selections[category as AssetCategory] ?? 0;
+                
+                console.log(`Rendering dropdown for ${category}: ${categoryAssets.length} assets available`);
+                
+                return (
+                  <div key={category} className="asset-selector">
+                    <label className="block font-bold mb-2 text-black text-xs uppercase">
+                      {category.charAt(0).toUpperCase() + category.slice(1)}:
+                    </label>
+                    <div className="flex items-center">
+                      <select 
+                        value={selectedIndex < categoryAssets.length ? selectedIndex : 0}
+                        onChange={(e) => handleAssetChange(category as AssetCategory, parseInt(e.target.value))}
+                        className="flex-1 p-2 border-4 border-black bg-white text-black text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                      >
+                        {categoryAssets.length > 0 ? (
+                          categoryAssets.map((asset, idx) => (
+                            <option key={idx} value={idx}>
+                              {asset.name || `${category} ${idx + 1}`}
+                            </option>
+                          ))
+                        ) : (
+                          <option value={0}>No {category} options available</option>
+                        )}
+                      </select>
+                      
+                      {/* Only show toggle buttons for eye, mouth, and hat */}
+                      {(category === 'eye' || category === 'mouth' || category === 'hat') && (
+                        <button
+                          onClick={() => handleEquipToggle(category as keyof EquippedState)}
+                          className={`ml-2 px-2 py-1 border-4 border-black text-xs font-bold flex items-center ${
+                            equipped[category as keyof EquippedState] 
+                              ? 'bg-orange-500 text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' 
+                              : 'bg-gray-300 text-gray-600'
+                          }`}
+                          title={equipped[category as keyof EquippedState] ? "Unequip" : "Equip"}
+                        >
+                          {equipped[category as keyof EquippedState] ? "✓" : "✗"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex justify-center mt-6 space-x-4">
+              <button 
+                onClick={handleRandomize}
+                className="px-6 py-3 bg-blue-500 text-white font-bold text-xs border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all duration-200 uppercase tracking-wide"
+              >
+                Randomize
+              </button>
+              <button 
+                onClick={handleSave}
+                className="px-6 py-3 bg-orange-500 text-white font-bold text-xs border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all duration-200 uppercase tracking-wide"
+              >
+                Save PFP
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Save Notification */}
+      <AnimatePresence>
+        {showSaveNotification && (
+          <motion.div 
+            className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            style={{ fontFamily: 'var(--font-press-start)' }}
+          >
+            PFP Saved Successfully!
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+});
+
+export default SimplePfpMaker;

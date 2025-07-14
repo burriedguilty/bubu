@@ -4,6 +4,7 @@ import Image from 'next/image';
 import React, { useState } from 'react';
 import AnimatedClouds from './AnimatedClouds';
 import { motion, AnimatePresence } from 'framer-motion';
+import PfpMakerModal from './PfpMakerModal';
 
 const HeroSection = () => {
   const [showToast, setShowToast] = useState(false);
@@ -12,28 +13,46 @@ const HeroSection = () => {
       {/* Animated clouds background with dithered effect */}
       <AnimatedClouds />
 
-      {/* Social media link in top left corner */}
-      <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-10 hover-scale">
-        <a href="https://x.com" target="_blank" rel="noopener noreferrer">
-          {/* SVG filter definition for white outline */}
-          <svg width="0" height="0" className="absolute">
-            <filter id="white-outline" x="-20%" y="-20%" width="140%" height="140%">
-              <feMorphology operator="dilate" radius="2" in="SourceAlpha" result="thicken" />
-              <feFlood floodColor="white" result="white" />
-              <feComposite in="white" in2="thicken" operator="in" result="whiteOutline" />
-              <feComposite in="SourceGraphic" in2="whiteOutline" operator="over" />
-            </filter>
-          </svg>
-          
-          <Image 
-            src="/X.svg" 
-            alt="X Social Media" 
-            width={50} 
-            height={50} 
-            className="text-white sm:w-[60px] sm:h-[60px] md:w-[70px] md:h-[70px]"
-            style={{ filter: 'url(#white-outline)' }}
+      {/* Social media links in top left corner */}
+      <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-10 flex items-center gap-4">
+        {/* X Social Media */}
+        <div className="hover-scale">
+          <a href="https://x.com" target="_blank" rel="noopener noreferrer">
+            {/* SVG filter definition for white outline */}
+            <svg width="0" height="0" className="absolute">
+              <filter id="white-outline" x="-20%" y="-20%" width="140%" height="140%">
+                <feMorphology operator="dilate" radius="2" in="SourceAlpha" result="thicken" />
+                <feFlood floodColor="white" result="white" />
+                <feComposite in="white" in2="thicken" operator="in" result="whiteOutline" />
+                <feComposite in="SourceGraphic" in2="whiteOutline" operator="over" />
+              </filter>
+            </svg>
+            
+            <Image 
+              src="/X.svg" 
+              alt="X Social Media" 
+              width={50} 
+              height={50} 
+              className="text-white sm:w-[60px] sm:h-[60px] md:w-[70px] md:h-[70px]"
+              style={{ filter: 'url(#white-outline)' }}
+            />
+          </a>
+        </div>
+        
+        {/* PFP Maker Button */}
+        <div className="hover-scale">
+          <PfpMakerModal 
+            buttonText="Create PFP"
+            buttonClassName="px-3 py-2 sm:px-4 sm:py-3 bg-amber-500 text-white font-bold text-xs sm:text-sm border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all duration-200 uppercase tracking-wide"
+            modalClassName="bg-amber-500 border-4 border-black p-6 rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] max-w-4xl mx-auto"
+            width={320}
+            onSave={(dataUrl) => {
+              // You can handle the saved dataUrl here
+              console.log('PFP saved:', dataUrl);
+              // You could use this dataUrl to display the image or upload it
+            }}
           />
-        </a>
+        </div>
       </div>
 
       {/* Center logo with glow effect */}

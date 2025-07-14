@@ -1,0 +1,53 @@
+/* Add this to your existing globals.css */
+.pixelated {
+  image-rendering: pixelated !important;
+  image-rendering: -moz-crisp-edges !important;
+  image-rendering: crisp-edges !important;
+  -ms-interpolation-mode: nearest-neighbor !important;
+  image-rendering: -webkit-optimize-contrast !important;
+  -webkit-font-smoothing: none !important;
+}
+
+/* Force pixel art rendering for canvas elements */
+canvas.pixelated {
+  image-rendering: pixelated !important;
+  image-rendering: -moz-crisp-edges !important;
+  image-rendering: crisp-edges !important;
+  -ms-interpolation-mode: nearest-neighbor !important;
+  image-rendering: -webkit-optimize-contrast !important;
+  -webkit-font-smoothing: none !important;
+  transform: translateZ(0); /* Force GPU acceleration */
+}
+
+/* Smooth rendering for display purposes */
+.smooth-rendering {
+  image-rendering: auto !important;
+  -webkit-font-smoothing: antialiased !important;
+  transform: translateZ(0); /* Force GPU acceleration */
+}
+
+/* Responsive container for PFP */
+.pfp-container {
+  width: 100%;
+  max-width: 500px;
+  aspect-ratio: 1/1;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .pfp-container {
+    max-width: 300px;
+    margin: 0 auto;
+  }
+}
+
+/* High DPI screen optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .pfp-container {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+}
