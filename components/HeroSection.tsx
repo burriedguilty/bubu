@@ -15,11 +15,28 @@ const HeroSection = () => {
   // Ref for scroll container
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
+  // Function to scroll to the next section
+  const scrollToNextSection = () => {
+    // Find the section divider or about section
+    const nextSection = document.querySelector('.section-divider, #about-section');
+    
+    if (nextSection) {
+      // Smooth scroll to the next section
+      nextSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // Fallback: scroll down 100vh if section not found
+      window.scrollTo({
+        top: window.innerHeight,
+        behavior: 'smooth'
+      });
+    }
+  };
+  
   useEffect(() => {
-    // Show scroll indicator after 2 seconds
+    // Show scroll indicator after 1 second
     const timer = setTimeout(() => {
       setShowScrollIndicator(true);
-    }, 2000);
+    }, 1000);
     
     // Handle scroll event to fade out indicator
     const handleScroll = () => {
@@ -151,11 +168,15 @@ const HeroSection = () => {
             </div>
           </div>
           
-          {/* Scroll Down Indicator with Text - appears after 2 seconds, fades on scroll */}
+          {/* Scroll Down Indicator with Text - appears after 1 second with fade-in, fades on scroll */}
           {showScrollIndicator && (
             <div 
-              className="flex flex-col items-center mt-16 sm:mt-20 mb-8 fixed bottom-10 left-1/2 transform -translate-x-1/2 transition-opacity duration-500" 
+              className="flex flex-col items-center mt-16 sm:mt-20 mb-8 fixed bottom-10 left-1/2 transform -translate-x-1/2 transition-opacity duration-500 cursor-pointer animate-fadeIn" 
               style={{ opacity: scrollOpacity }}
+              onClick={scrollToNextSection}
+              role="button"
+              tabIndex={0}
+              aria-label="Scroll to next section"
             >
               {/* SCROLL DOWN text with beeping animation */}
               <div className="mb-2 animate-blink">
