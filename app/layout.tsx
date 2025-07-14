@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter, Orbitron, Bungee, Press_Start_2P } from 'next/font/google';
 import './globals.css';
+// Import matchMedia mock for SSR
+import '../utils/mediaQueryMock';
 
 const inter = Inter({ subsets: ['latin'] });
 
