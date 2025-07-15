@@ -5,9 +5,9 @@ export interface AssetItem {
 }
 
 export const backgroundAssets: AssetItem[] = [
-  { name: 'BG 1', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752427250/2_gwn7hm.jpg' },
-  { name: 'BG 2', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752427249/3_if9dgl.jpg' },
-  { name: 'BG 3', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752427249/4_sosjyq.jpg' },
-  { name: 'BG 4', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752427248/1_dfdfqk.jpg' },
-  { name: 'BG 5', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752427248/5_ihbrxz.jpg' },
+  { name: 'BG 1', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752605627/IMG_5104_mpyujc.jpg' },
+  { name: 'BG 2', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752605622/IMG_5106_hv1gig.jpg' },
+  { name: 'BG 3', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752605620/IMG_5105_f4tobl.jpg' },
+  { name: 'BG 4', url: '' },
+  { name: 'BG 5', url: '' },
 ];
