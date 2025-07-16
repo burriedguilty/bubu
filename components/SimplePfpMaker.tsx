@@ -47,6 +47,7 @@ import { hatAssets as importedHatAssets } from './pfp/HatAssets';
 import { mouthAssets as importedMouthAssets } from './pfp/MouthAssets';
 import { costumeAssets as importedCostumeAssets } from './pfp/CostumeAssets';
 import { getAssetByCode, HonoraryAsset as ImportedHonoraryAsset } from './pfp/HonoraryAssets';
+import { PFP_X_CAPTION } from './x';
 
 // Export the ref type for external use
 export type { SimplePfpMakerRef };
@@ -483,7 +484,7 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
     try {
       // Create a temporary canvas for export at full resolution (1000px as per user preference)
       const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = canvasSize; // 1000px internal resolution
+      tempCanvas.width = canvasSize; // Use canvasSize (2000px) for high resolution
       tempCanvas.height = canvasSize;
       const tempCtx = tempCanvas.getContext('2d', { alpha: false });
       if (!tempCtx) return;
@@ -496,12 +497,26 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
       
       // Create download link
       const link = document.createElement('a');
-      link.download = 'my-pfp.png';
+      link.download = 'my-bubu-pfp.png';
       const dataUrl = tempCanvas.toDataURL('image/png', 1.0); // Use highest quality
       link.href = dataUrl;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      
+      // Copy X post caption to clipboard
+      navigator.clipboard.writeText(PFP_X_CAPTION)
+        .then(() => {
+          console.log('X caption copied to clipboard');
+        })
+        .catch(err => {
+          console.error('Failed to copy X caption: ', err);
+        });
+      
+      // Open X (Twitter) in new tab with pre-filled caption
+      const encodedText = encodeURIComponent(PFP_X_CAPTION);
+      const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
+      window.open(twitterIntentUrl, '_blank');
       
       // Show save notification
       setShowSaveNotification(true);
@@ -836,9 +851,12 @@ const SaveNotification: React.FC<SaveNotificationProps> = ({ isVisible, message 
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
-          style={{ fontFamily: 'var(--font-press-start)' }}
+          style={{ fontFamily: 'var(--font-press-start)', fontSize: '0.75rem' }}
         >
-          {message}
+          <div className="flex flex-col gap-1">
+            <div>{message}</div>
+            <div className="text-xs">X caption copied to clipboard!</div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

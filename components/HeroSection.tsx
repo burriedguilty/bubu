@@ -5,6 +5,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import AnimatedClouds from './AnimatedClouds';
 import { motion, AnimatePresence } from 'framer-motion';
 import PfpMakerModal from './PfpMakerModal';
+import { CONTRACT_ADDRESS } from './contract';
 
 const HeroSection = () => {
   const [showToast, setShowToast] = useState(false);
@@ -111,7 +112,7 @@ const HeroSection = () => {
           <div 
             className="relative cursor-pointer inline-flex py-2 px-3 sm:py-3 sm:px-4 text-xs sm:text-sm bg-white border-4 border-black items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all duration-200 max-w-full overflow-hidden"
             onClick={() => {
-              const contractAddress = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
+              const contractAddress = CONTRACT_ADDRESS;
               navigator.clipboard.writeText(contractAddress)
                 .then(() => {
                   setShowToast(true);
@@ -123,7 +124,7 @@ const HeroSection = () => {
             }}
           >
             <span className="text-black text-xs sm:text-sm truncate max-w-[200px] sm:max-w-[250px] md:max-w-full">
-              0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
+              {CONTRACT_ADDRESS}
             </span>
             <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
