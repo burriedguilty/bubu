@@ -9,15 +9,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const Intro: React.FC = () => {
   // State to track if intro has been clicked
-  const [introComplete, setIntroComplete] = useState(false);
+  const [introComplete, setIntroComplete] = useState(true);
   const [mounted, setMounted] = useState(false);
   
   // Handle component mount
   useEffect(() => {
     setMounted(true);
     
-    // For development, uncomment to always show intro
-    localStorage.removeItem('bubu_visited');
+    // For development, always set as visited
+    localStorage.setItem('bubu_visited', 'true');
     
     // Check if user has visited before
     const hasVisited = localStorage.getItem('bubu_visited') === 'true';
