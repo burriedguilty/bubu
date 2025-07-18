@@ -5,6 +5,19 @@ export interface AssetItem {
 }
 
 export const backgroundAssets: AssetItem[] = [
+  // Pastel color backgrounds (no external URLs needed)
+  { name: 'Pastel Pink', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23FFD1DC"/></svg>' },
+  { name: 'Pastel Blue', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23CCCCFF"/></svg>' },
+  { name: 'Pastel Green', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23C1E1C1"/></svg>' },
+  { name: 'Pastel Yellow', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23FFFFCC"/></svg>' },
+  { name: 'Pastel Lavender', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23E6E6FA"/></svg>' },
+  { name: 'Pastel Mint', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23AAF0D1"/></svg>' },
+  { name: 'Pastel Peach', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23FFDAB9"/></svg>' },
+  { name: 'Pastel Lilac', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23D8BFD8"/></svg>' },
+  { name: 'Pastel Coral', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23F8B195"/></svg>' },
+  { name: 'Pastel Sky', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23B5E8F7"/></svg>' },
+  
+  // Original backgrounds
   { name: 'BG 1', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752605627/IMG_5104_mpyujc.jpg' },
   { name: 'BG 2', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752605622/IMG_5106_hv1gig.jpg' },
   { name: 'BG 3', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752605620/IMG_5105_f4tobl.jpg' },
