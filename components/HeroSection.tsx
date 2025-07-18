@@ -79,7 +79,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <div className="relative w-full p-4 sm:p-6 md:p-8 min-h-[100vh] flex flex-col justify-center items-center" style={{ fontFamily: 'var(--font-press-start)' }}>
+    <div className="relative w-full min-h-screen flex flex-col justify-between items-center p-4 sm:p-6 md:p-8" style={{ fontFamily: 'var(--font-press-start)' }}>
       {/* Animated clouds background with dithered effect */}
       <AnimatedClouds />
 
@@ -110,8 +110,9 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Center logo with glow effect */}
-      <div className="flex flex-col items-center justify-center py-16 z-10 mt-8">
+      {/* HERO CONTENT GROUPED */}
+      <div className="flex flex-col justify-center items-center w-full max-w-2xl mx-auto flex-1">
+        {/* Logo */}
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-2xl mb-8 md:mb-12">
           <div className="relative">
             <Image 
@@ -125,11 +126,10 @@ const HeroSection = () => {
           </div>
         </div>
 
-        
         {/* Contract address with copy to clipboard functionality - Pixel Art Style */}
-        <div className="mt-12 w-full flex flex-col items-center mb-10">
+        <div className="w-full flex flex-col items-center mb-6">
           <div 
-            className="relative cursor-pointer inline-flex py-2 px-3 sm:py-3 sm:px-4 text-xs sm:text-sm bg-white border-4 border-black items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all duration-200 max-w-full overflow-hidden mb-10"
+            className="relative cursor-pointer inline-flex py-2 px-3 sm:py-3 sm:px-4 text-xs sm:text-sm bg-white border-4 border-black items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all duration-200 max-w-full overflow-hidden mb-6"
             onClick={() => {
               const contractAddress = CONTRACT_ADDRESS;
               navigator.clipboard.writeText(contractAddress)
@@ -149,7 +149,6 @@ const HeroSection = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
             </svg>
           </div>
-          
           {/* Pixel Art Toast Notification */}
           <AnimatePresence>
             {showToast && (
@@ -169,64 +168,61 @@ const HeroSection = () => {
               </motion.div>
             )}
           </AnimatePresence>
-          
-          {/* Pixel Art Style Button */}
-          <div className="flex flex-col items-center justify-center">
-            {/* PFP Maker Button with fade-out on scroll */}
-            <div 
-              ref={buttonRef}
-              className="w-full max-w-xs"
-              style={{
-                opacity: showHeroButton ? 1 : 0,
-                pointerEvents: showHeroButton ? 'auto' : 'none',
-                transition: 'opacity 0.5s cubic-bezier(0.4,0,0.2,1)'
-              }}
-            >
-              <PfpMakerModal 
-                buttonText="Create PFP"
-                buttonClassName="px-6 sm:px-8 py-3 sm:py-4 bg-amber-500 text-white font-bold text-xs sm:text-sm border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all duration-200 uppercase tracking-wide w-full"
-                modalClassName="bg-amber-500 border-4 border-black p-6 rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] max-w-4xl mx-auto"
-                width={320}
-                onSave={(dataUrl) => {
-                  // You can handle the saved dataUrl here
-                  console.log('PFP saved:', dataUrl);
-                  // You could use this dataUrl to display the image or upload it
-                }}
-              />
+        </div>
+
+        {/* Create PFP Button */}
+        <div 
+          ref={buttonRef}
+          className="w-full max-w-xs mb-8 z-30 relative"
+          style={{
+            opacity: showHeroButton ? 1 : 0,
+            pointerEvents: showHeroButton ? 'auto' : 'none',
+            transition: 'opacity 0.5s cubic-bezier(0.4,0,0.2,1)'
+          }}
+        >
+          <PfpMakerModal 
+            buttonText="Create PFP"
+            buttonClassName="px-6 sm:px-8 py-3 sm:py-4 bg-amber-500 text-white font-bold text-xs sm:text-sm border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all duration-200 uppercase tracking-wide w-full"
+            modalClassName="bg-amber-500 border-4 border-black p-6 rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] max-w-4xl mx-auto"
+            width={320}
+            onSave={(dataUrl) => {
+              // You can handle the saved dataUrl here
+              console.log('PFP saved:', dataUrl);
+              // You could use this dataUrl to display the image or upload it
+            }}
+          />
+        </div>
+
+        {/* SCROLL DOWN indicator always below button, with fixed spacing */}
+        {showScrollIndicator && (
+          <div 
+            className="flex flex-col items-center mb-8 cursor-pointer animate-fadeIn"
+            style={{ 
+              opacity: scrollOpacity, 
+              transition: 'opacity 0.5s cubic-bezier(0.4,0,0.2,1)' 
+            }}
+            onClick={scrollToNextSection}
+            role="button"
+            tabIndex={0}
+            aria-label="Scroll to next section"
+          >
+            <div className="mb-2 animate-blink">
+              <p className="text-black font-bold text-xs sm:text-sm uppercase tracking-widest">SCROLL DOWN</p>
             </div>
-            {/* SCROLL DOWN indicator always below button, with dynamic margin */}
-            {showScrollIndicator && (
-              <div 
-                className="flex flex-col items-center mb-8 cursor-pointer animate-fadeIn"
-                style={{ 
-                  marginTop: scrollIndicatorMargin, 
-                  opacity: scrollOpacity, 
-                  transition: 'margin-top 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.5s cubic-bezier(0.4,0,0.2,1)' 
-                }}
-                onClick={scrollToNextSection}
-                role="button"
-                tabIndex={0}
-                aria-label="Scroll to next section"
-              >
-                <div className="mb-2 animate-blink">
-                  <p className="text-black font-bold text-xs sm:text-sm uppercase tracking-widest">SCROLL DOWN</p>
-                </div>
-                <div className="animate-bounce-slow">
-                  <div className="w-10 h-10 relative">
-                    <svg width="40" height="40" viewBox="0 0 24 24" className="fill-amber-500 stroke-black stroke-[2px] drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                      <path d="M12 20L4 12H9V4H15V12H20L12 20Z" />
-                    </svg>
-                    <div className="absolute inset-0 animate-pulse-fast opacity-50">
-                      <svg width="40" height="40" viewBox="0 0 24 24" className="fill-amber-400 stroke-black stroke-[2px]">
-                        <path d="M12 20L4 12H9V4H15V12H20L12 20Z" />
-                      </svg>
-                    </div>
-                  </div>
+            <div className="animate-bounce-slow">
+              <div className="w-10 h-10 relative">
+                <svg width="40" height="40" viewBox="0 0 24 24" className="fill-amber-500 stroke-black stroke-[2px] drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                  <path d="M12 20L4 12H9V4H15V12H20L12 20Z" />
+                </svg>
+                <div className="absolute inset-0 animate-pulse-fast opacity-50">
+                  <svg width="40" height="40" viewBox="0 0 24 24" className="fill-amber-400 stroke-black stroke-[2px]">
+                    <path d="M12 20L4 12H9V4H15V12H20L12 20Z" />
+                  </svg>
                 </div>
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
