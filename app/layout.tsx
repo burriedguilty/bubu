@@ -30,8 +30,8 @@ const pressStart2P = Press_Start_2P({
 });
 
 export const metadata: Metadata = {
-  title: 'Bubu',
-  description: 'Bubu website with three sections',
+  title: 'BUBU THE LIL BOY',
+  description: 'The one and only lil boss of solana chain',
 };
 
 export default function RootLayout({
