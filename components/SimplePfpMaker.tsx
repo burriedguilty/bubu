@@ -757,14 +757,14 @@ const renderActionButton = (label: string, onClick: () => void, bgColor: string)
           </div>
           
           {/* Controls - with fixed height to match canvas */}
-          <div className="pfp-controls flex-1 space-y-4 bg-amber-100 p-4 overflow-y-auto max-h-[70vh] md:max-h-[500px] border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+          <div className="pfp-controls flex-1 space-y-4 bg-amber-100 p-4 overflow-y-auto max-h-[70vh] md:max-h-[500px] border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] pb-[90px]">
             {/* Asset Selection */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {(['bg', 'body', 'eye', 'mouth', 'hat', 'costume'] as AssetCategory[]).map(renderAssetSelector)}
             </div>
             
             {/* Action Buttons */}
-            <div className="flex flex-wrap justify-center gap-3 mt-6 pb-6 sticky bottom-0 bg-amber-100 pt-4 border-t-4 border-black">
+            <div className="flex flex-wrap justify-center gap-3 mt-6 pb-6 sticky bottom-0 pt-4 border-t-4 border-black z-20">
               {renderActionButton('Randomize', handleRandomize, 'bg-blue-500')}
               {renderActionButton('Save PFP', handleSave, 'bg-orange-500')}
               {renderActionButton('CODE', () => setShowCodeInput(true), 'bg-blue-500')}

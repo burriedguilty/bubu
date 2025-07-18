@@ -39,6 +39,17 @@ export const costumeAssets: AssetItem[] = [
   { name: '33', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752684540/IMG_0343_j8ys2l.png' },
   { name: '34', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752684540/IMG_0356_dxa58d.png' },
   { name: '35', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752684540/IMG_0357_nia4of.png' },
+  { name: '36', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752829016/IMG_0353_zqnbew.png' },
+  { name: '37', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752829017/IMG_0451_ksipu4.png' },
+  { name: '38', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752829021/IMG_0365_hir1tx.png' },
+  { name: '39', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752829021/IMG_0457_hzmysv.png' },
+  { name: '40', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752829021/IMG_0459_qnqfqh.png' },
+  { name: '41', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752829022/IMG_0454_yngrkl.png' },
+  { name: '42', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752829023/IMG_0452_cmxb5t.png' },
+  { name: '43', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752829306/IMG_0443_lmplcp.png' },
+  { name: '44', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752829309/IMG_0440_dvawhb.png' },
+  { name: '45', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752829314/IMG_0441_e9gpkn.png' },
+  { name: '46', url: 'https://res.cloudinary.com/dfjqqnv3x/image/upload/v1752829313/IMG_0442_e7alo3.png' },
 ];
 
 export default costumeAssets;

@@ -8,9 +8,15 @@ import PfpMakerModal from './PfpMakerModal';
 import { CONTRACT_ADDRESS } from './contract';
 
 const HeroSection = () => {
+  // Ref for measuring button height
+  const buttonRef = useRef<HTMLDivElement>(null);
+  const [scrollIndicatorMargin, setScrollIndicatorMargin] = useState('2.2rem'); // default margin if button hidden
+
   const [showToast, setShowToast] = useState(false);
   // State for delayed scroll indicator appearance
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  // State for fading out the Create PFP button
+  const [showHeroButton, setShowHeroButton] = useState(true);
   // State for scroll indicator opacity
   const [scrollOpacity, setScrollOpacity] = useState(1);
   // Ref for scroll container
@@ -34,32 +40,44 @@ const HeroSection = () => {
   };
   
   useEffect(() => {
+    // Update scrollIndicatorMargin whenever button visibility changes
+    const updateMargin = () => {
+      if (buttonRef.current && showHeroButton) {
+        setScrollIndicatorMargin(`${buttonRef.current.offsetHeight + 18}px`); // 18px = spacing
+      } else {
+        setScrollIndicatorMargin('2.2rem'); // fallback margin
+      }
+    };
+    updateMargin();
+  }, [showHeroButton]);
+
+  useEffect(() => {
     // Show scroll indicator after 1 second
     const timer = setTimeout(() => {
       setShowScrollIndicator(true);
     }, 1000);
-    
-    // Handle scroll event to fade out indicator
+    // Handle scroll event to fade out indicator and button
     const handleScroll = () => {
       if (window.scrollY > 50) {
-        // Calculate opacity based on scroll position (fade out between 50px and 200px scroll)
+        // Fade out scroll indicator
         const newOpacity = Math.max(0, 1 - (window.scrollY - 50) / 150);
         setScrollOpacity(newOpacity);
+        // Fade out hero button
+        setShowHeroButton(false);
       } else {
         setScrollOpacity(1);
+        setShowHeroButton(true);
       }
     };
-    
     // Add scroll event listener
     window.addEventListener('scroll', handleScroll);
-    
     // Cleanup
     return () => {
       clearTimeout(timer);
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
-  
+
   return (
     <div className="relative w-full p-4 sm:p-6 md:p-8 min-h-[100vh] flex flex-col justify-center items-center" style={{ fontFamily: 'var(--font-press-start)' }}>
       {/* Animated clouds background with dithered effect */}
@@ -69,7 +87,7 @@ const HeroSection = () => {
       <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-10 flex items-center gap-4">
         {/* X Social Media */}
         <div className="hover-scale">
-          <a href="https://x.com" target="_blank" rel="noopener noreferrer">
+          <a href="https://x.com/BubuTheLilBoy" target="_blank" rel="noopener noreferrer">
             {/* SVG filter definition for white outline */}
             <svg width="0" height="0" className="absolute">
               <filter id="white-outline" x="-20%" y="-20%" width="140%" height="140%">
@@ -106,11 +124,12 @@ const HeroSection = () => {
             />
           </div>
         </div>
+
         
         {/* Contract address with copy to clipboard functionality - Pixel Art Style */}
-        <div className="mt-12 w-full flex flex-col items-center">
+        <div className="mt-12 w-full flex flex-col items-center mb-10">
           <div 
-            className="relative cursor-pointer inline-flex py-2 px-3 sm:py-3 sm:px-4 text-xs sm:text-sm bg-white border-4 border-black items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all duration-200 max-w-full overflow-hidden"
+            className="relative cursor-pointer inline-flex py-2 px-3 sm:py-3 sm:px-4 text-xs sm:text-sm bg-white border-4 border-black items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all duration-200 max-w-full overflow-hidden mb-10"
             onClick={() => {
               const contractAddress = CONTRACT_ADDRESS;
               navigator.clipboard.writeText(contractAddress)
@@ -152,9 +171,17 @@ const HeroSection = () => {
           </AnimatePresence>
           
           {/* Pixel Art Style Button */}
-          <div className="flex justify-center mt-6 sm:mt-8">
-            {/* PFP Maker Button */}
-            <div className="w-full max-w-xs">
+          <div className="flex flex-col items-center justify-center">
+            {/* PFP Maker Button with fade-out on scroll */}
+            <div 
+              ref={buttonRef}
+              className="w-full max-w-xs"
+              style={{
+                opacity: showHeroButton ? 1 : 0,
+                pointerEvents: showHeroButton ? 'auto' : 'none',
+                transition: 'opacity 0.5s cubic-bezier(0.4,0,0.2,1)'
+              }}
+            >
               <PfpMakerModal 
                 buttonText="Create PFP"
                 buttonClassName="px-6 sm:px-8 py-3 sm:py-4 bg-amber-500 text-white font-bold text-xs sm:text-sm border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all duration-200 uppercase tracking-wide w-full"
@@ -167,38 +194,38 @@ const HeroSection = () => {
                 }}
               />
             </div>
-          </div>
-          
-          {/* Scroll Down Indicator with Text - appears after 1 second with fade-in, fades on scroll */}
-          {showScrollIndicator && (
-            <div 
-              className="flex flex-col items-center mt-16 sm:mt-20 mb-8 fixed bottom-10 left-1/2 transform -translate-x-1/2 transition-opacity duration-500 cursor-pointer animate-fadeIn" 
-              style={{ opacity: scrollOpacity }}
-              onClick={scrollToNextSection}
-              role="button"
-              tabIndex={0}
-              aria-label="Scroll to next section"
-            >
-              {/* SCROLL DOWN text with beeping animation */}
-              <div className="mb-2 animate-blink">
-                <p className="text-black font-bold text-xs sm:text-sm uppercase tracking-widest">SCROLL DOWN</p>
-              </div>
-              
-              {/* Larger arrow with improved UI */}
-              <div className="animate-bounce-slow">
-                <div className="w-10 h-10 relative">
-                  <svg width="40" height="40" viewBox="0 0 24 24" className="fill-amber-500 stroke-black stroke-[2px] drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                    <path d="M12 20L4 12H9V4H15V12H20L12 20Z" />
-                  </svg>
-                  <div className="absolute inset-0 animate-pulse-fast opacity-50">
-                    <svg width="40" height="40" viewBox="0 0 24 24" className="fill-amber-400 stroke-black stroke-[2px]">
+            {/* SCROLL DOWN indicator always below button, with dynamic margin */}
+            {showScrollIndicator && (
+              <div 
+                className="flex flex-col items-center mb-8 cursor-pointer animate-fadeIn"
+                style={{ 
+                  marginTop: scrollIndicatorMargin, 
+                  opacity: scrollOpacity, 
+                  transition: 'margin-top 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.5s cubic-bezier(0.4,0,0.2,1)' 
+                }}
+                onClick={scrollToNextSection}
+                role="button"
+                tabIndex={0}
+                aria-label="Scroll to next section"
+              >
+                <div className="mb-2 animate-blink">
+                  <p className="text-black font-bold text-xs sm:text-sm uppercase tracking-widest">SCROLL DOWN</p>
+                </div>
+                <div className="animate-bounce-slow">
+                  <div className="w-10 h-10 relative">
+                    <svg width="40" height="40" viewBox="0 0 24 24" className="fill-amber-500 stroke-black stroke-[2px] drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                       <path d="M12 20L4 12H9V4H15V12H20L12 20Z" />
                     </svg>
+                    <div className="absolute inset-0 animate-pulse-fast opacity-50">
+                      <svg width="40" height="40" viewBox="0 0 24 24" className="fill-amber-400 stroke-black stroke-[2px]">
+                        <path d="M12 20L4 12H9V4H15V12H20L12 20Z" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -110,11 +110,8 @@ const AboutSection = () => {
                   style={{ fontFamily: 'var(--font-press-start)' }}
                 >
                   <p className="text-xs sm:text-sm leading-relaxed">
-                    BUBU is a revolutionary cleaning meme coin designed to transform the crypto space! Born from the idea that the crypto market needs some cleaning up, BUBU combines humor with real utility.
-                  </p>
-                  <p className="text-xs sm:text-sm leading-relaxed mt-2 sm:mt-4">
-                    With innovative tokenomics and a strong community focus, BUBU aims to sweep away the competition and mop up the floor with other meme coins. Join the cleaning revolution today!
-                  </p>
+  Meet Bubu—a kid with vision and ambition that’s remarkable for someone so young, radiating a boss-like aura. He’s not your typical meme; he’s the quiet type, the kind who watches and learns, then strikes when it counts.
+</p>
                 </div>
               </div>
               
@@ -122,9 +119,16 @@ const AboutSection = () => {
               <div className="flex justify-center mt-8">
                 <div className="relative">
                   <div className="absolute inset-0 bg-black translate-x-2 translate-y-2"></div>
-                  <button className="relative z-10 bg-amber-100 border-4 border-black px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 text-black font-bold uppercase text-xs sm:text-sm" style={{ fontFamily: 'var(--font-press-start)' }}>
-                    FOLLOW ME
-                  </button>
+                  <a
+  href="https://x.com/BubuTheLilBoy"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="relative z-10 bg-amber-100 border-4 border-black px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 text-black font-bold uppercase text-xs sm:text-sm flex items-center justify-center"
+  style={{ fontFamily: 'var(--font-press-start)' }}
+  aria-label="Follow Bubu on X"
+>
+  FOLLOW ME
+</a>
                 </div>
               </div>
             </div>
