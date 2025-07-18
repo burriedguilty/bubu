@@ -1,0 +1,211 @@
+/* Tailwind directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Scrollbar - Pixel Art Style */
+::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #000000;
+  border: 2px solid #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #f59e0b; /* amber-500 */
+  border: 4px solid #000000;
+  border-radius: 0; /* square corners for pixel art look */
+  image-rendering: pixelated;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #d97706; /* amber-600 */
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: auto;
+  scrollbar-color: #f59e0b #000000;
+}
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+  --primary-color: #4CAF50;
+  --secondary-color: #FFD700;
+  --accent-color: #FF6B6B;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(to bottom, #f5f7fa, #c3cfe2);
+  font-family: 'Inter', sans-serif;
+}
+
+/* Button styles */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  transition: all 300ms;
+}
+
+.btn-primary {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #388E3C;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+/* Card styles */
+.card {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  padding: 1.5rem;
+  transition: all 300ms;
+}
+
+.card:hover {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Input styles */
+.input-field {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #D1D5DB;
+  border-radius: 0.75rem;
+  transition: all 300ms;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+/* Animation for elements */
+.hover-scale {
+  transition: transform 300ms;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+/* Marquee animation */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+  min-width: 100%;
+  white-space: nowrap;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Glow effect */
+.glow {
+  text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 20px rgba(255,255,255,0.8), 0 0 30px rgba(255,215,0,0.8);
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.pulse {
+  animation: pulse 2s infinite ease-in-out;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(90deg, #4CAF50, #FFD700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Twinkle animation for stars */
+@keyframes twinkle {
+  0% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.2); }
+  100% { opacity: 0.2; transform: scale(1); }
+}
+
+/* Glow effect for stars */
+.shadow-glow {
+  box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.7);
+}
+
+/* Slow pulse animation for cloud parts */
+@keyframes pulse-slow {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 8s infinite ease-in-out;
+}
+
+/* Slow float animation for cloud parts */
+@keyframes float-slow {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+.animate-float-slow {
+  animation: float-slow 12s infinite ease-in-out;
+}
+
+/* Cloud movement/* Animation for clouds moving from right to left */
+@keyframes moveCloud {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-200vw); }
+}
+
+/* Animation for initial clouds that are already positioned on screen */
+@keyframes moveCloudFromPosition {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-200vw); }
+}
+
+/* Vertical floating animation for clouds */
+@keyframes float-vertical {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0); }
+}
+
+/* Combined animations for cloud movement */
+.cloud-container {
+  will-change: transform, opacity;
+}
+
+.cloud-container.initial {
+  animation-name: moveCloudFromPosition, float-vertical;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+}
+
+.cloud-container.new {
+  animation-name: moveCloud, float-vertical;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+}
