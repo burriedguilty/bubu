@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import CodeInputComponent, { CodeMessage, HonoraryAsset as CodeHonoraryAsset } from './CodeInputComponent';
 
 // Type definitions
 type AssetCategory = 'bg' | 'body' | 'eye' | 'hat' | 'mouth' | 'costume';
@@ -14,8 +13,6 @@ interface Asset {
   img?: HTMLImageElement;
   backImg?: HTMLImageElement;
 }
-
-// Reuse HonoraryAsset and CodeMessage from CodeInputComponent
 
 interface EquippedState {
   eye: boolean;
@@ -36,7 +33,6 @@ interface SimplePfpMakerProps {
 
 interface SimplePfpMakerRef {
   randomize: () => void;
-  addHonoraryAsset: (asset: CodeHonoraryAsset) => boolean;
 }
 
 // Import asset configurations from separate files - use relative paths
@@ -46,7 +42,6 @@ import { eyeAssets as importedEyeAssets } from './pfp/EyeAssets';
 import { hatAssets as importedHatAssets } from './pfp/HatAssets';
 import { mouthAssets as importedMouthAssets } from './pfp/MouthAssets';
 import { costumeAssets as importedCostumeAssets } from './pfp/CostumeAssets';
-import { getAssetByCode, HonoraryAsset as ImportedHonoraryAsset } from './pfp/HonoraryAssets';
 import { PFP_X_CAPTION } from './x';
 
 // Export the ref type for external use
@@ -97,13 +92,6 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
   
   // Loading state
   const [isLoading, setIsLoading] = useState(true);
-  
-  // Code input state
-  const [showCodeInput, setShowCodeInput] = useState(false);
-  const [codeInput, setCodeInput] = useState('');
-  const [codeMessage, setCodeMessage] = useState<CodeMessage | null>(null);
-  const [unlockedAsset, setUnlockedAsset] = useState<CodeHonoraryAsset | null>(null);
-  const [unlockedHonoraryAssets, setUnlockedHonoraryAssets] = useState<CodeHonoraryAsset[]>([]);
 
   // Helper function to load an image and return a Promise
   const loadImage = (url: string): Promise<HTMLImageElement> => {
@@ -549,109 +537,9 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
     setSelections(newSelections);
   };
 
-  // Handle code submission
-  const handleCodeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Check if the code matches any honorary asset using the imported function
-    const matchingAsset = getAssetByCode(codeInput);
-    
-    if (matchingAsset) {
-      // Success
-      setCodeMessage({
-        text: `Unlocked: ${matchingAsset.name}!`,
-        type: 'success'
-      });
-      
-      // Convert the imported HonoraryAsset to CodeHonoraryAsset
-      const typedAsset: CodeHonoraryAsset = {
-        name: matchingAsset.name,
-        url: matchingAsset.url,
-        type: matchingAsset.type,
-        description: matchingAsset.description || '',
-        code: matchingAsset.code
-      };
-      
-      // Add to unlocked assets
-      setUnlockedHonoraryAssets(prev => [...prev, typedAsset]);
-      setUnlockedAsset(typedAsset);
-      
-      // Add the asset to the PFP maker
-      handleAddHonoraryAsset(typedAsset);
-      
-      // Clear input
-      setCodeInput('');
-      
-      // Auto-dismiss success after 2 seconds
-      setTimeout(() => {
-        setCodeMessage(null);
-        setShowCodeInput(false);
-      }, 2000);
-    } else {
-      // Error
-      setCodeMessage({
-        text: 'Invalid code. Try again.',
-        type: 'error'
-      });
-      
-      // Auto-dismiss error after 2 seconds
-      setTimeout(() => {
-        setCodeMessage(null);
-      }, 2000);
-    }
-  };
-  
-  // Handle adding honorary assets
-  const handleAddHonoraryAsset = (honoraryAsset: CodeHonoraryAsset): boolean => {
-    const category = honoraryAsset.type as AssetCategory;
-    const existingAssets = assets[category];
-    
-    // Check if this asset already exists by URL
-    const assetExists = existingAssets.some((asset: Asset) => asset.url === honoraryAsset.url);
-    
-    if (assetExists) {
-      return false;
-    }
-    
-    // Load the image
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = honoraryAsset.url;
-    
-    // Create a new asset with the image
-    const newAsset: Asset = {
-      name: honoraryAsset.name,
-      url: honoraryAsset.url,
-      img
-    };
-
-    // Add the asset to the category
-    setAssets(prev => {
-      const updatedCategory = [...prev[category], newAsset];
-      return {
-        ...prev,
-        [category]: updatedCategory
-      };
-    });
-
-    // Make sure the asset is equipped if it's a toggleable category
-    if (category === 'eye' || category === 'mouth' || category === 'hat') {
-      setEquipped(prev => ({
-        ...prev,
-        [category as keyof EquippedState]: true
-      }));
-    }
-
-    // Redraw the canvas
-    setTimeout(drawCanvas, 100);
-
-    return true;
-  };
-  
   // Expose methods via ref
   useImperativeHandle(ref, () => ({
-    randomize: handleRandomize,
-    addHonoraryAsset: handleAddHonoraryAsset
+    randomize: handleRandomize
   }));
 
   // Helper function to render asset selector
@@ -767,23 +655,10 @@ const renderActionButton = (label: string, onClick: () => void, bgColor: string)
             <div className="flex flex-wrap justify-center gap-3 mt-6 pb-6 sticky bottom-0 pt-4 border-t-4 border-black z-20">
               {renderActionButton('Randomize', handleRandomize, 'bg-blue-500')}
               {renderActionButton('Save PFP', handleSave, 'bg-orange-500')}
-              {renderActionButton('CODE', () => setShowCodeInput(true), 'bg-blue-500')}
             </div>
           </div>
         </div>
       )}
-      
-      {/* Code Input Modal */}
-      <CodeInputComponent
-        isVisible={showCodeInput}
-        onClose={() => setShowCodeInput(false)}
-        onSubmit={(code) => {
-          setCodeInput(code);
-          handleCodeSubmit(new Event('submit') as unknown as React.FormEvent);
-        }}
-        codeMessage={codeMessage}
-        unlockedAsset={unlockedAsset as CodeHonoraryAsset}
-      />
       
       {/* Save Notification */}
       <SaveNotification 
