@@ -92,13 +92,29 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
   
   // Loading state
   const [isLoading, setIsLoading] = useState(true);
+  // Track if essential assets are loaded (enough to show UI)
+  const [essentialAssetsLoaded, setEssentialAssetsLoaded] = useState(false);
+  
+  // Helper function to deduplicate assets by name
+  const deduplicateAssets = (assets: Asset[]): Asset[] => {
+    const uniqueAssets: Asset[] = [];
+    const seenNames = new Set<string>();
+    
+    for (const asset of assets) {
+      if (!seenNames.has(asset.name)) {
+        seenNames.add(asset.name);
+        uniqueAssets.push(asset);
+      }
+    }
+    
+    return uniqueAssets;
+  };
 
   // Helper function to load an image and return a Promise
   const loadImage = (url: string): Promise<HTMLImageElement> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      // Set image to pixelated rendering for better quality
       img.style.imageRendering = 'pixelated';
       // Add a timeout to prevent hanging on slow connections
       const timeout = setTimeout(() => {
@@ -284,108 +300,62 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
           return results;
         };
         
-        // PHASE 1: Load minimal essential assets to show something immediately
-        const essentialBgs = await processAssetCategory('bg', importedBgAssets, 3);
-        const essentialBodies = await processAssetCategory('body', importedBodyAssets, 2);
+        // PHASE 1: Load essential assets first (minimal set to show something)
+        const [essentialBgs, essentialBodies] = await Promise.all([
+          processAssetCategory('bg', importedBgAssets.slice(0, 3)),
+          processAssetCategory('body', importedBodyAssets.slice(0, 2))
+        ]);
         
-        // Update state with essential assets and turn off loading spinner
+        // Update state with essential assets (deduplicated)
         setAssets(prev => ({
           ...prev,
-          bg: essentialBgs,
-          body: essentialBodies
+          bg: deduplicateAssets(essentialBgs),
+          body: deduplicateAssets(essentialBodies)
         }));
         
-        // Turn off loading state as soon as we have the minimal essentials
+        // Mark essential assets as loaded and turn off loading state
+        setEssentialAssetsLoaded(true);
         setIsLoading(false);
         
         // PHASE 2: Load core assets needed for basic functionality
         const loadCoreAssets = async () => {
-          const [moreBgs, moreBodies, basicEyes, basicMouths] = await Promise.all([
-            processAssetCategory('bg', importedBgAssets.slice(3, 8)),
+          const [moreBgs, moreBodies, allEyes, allMouths] = await Promise.all([
+            processAssetCategory('bg', importedBgAssets.slice(3)),
             processAssetCategory('body', importedBodyAssets.slice(2)),
-            processAssetCategory('eye', importedEyeAssets.slice(0, 5)),
-            processAssetCategory('mouth', importedMouthAssets.slice(0, 5))
+            processAssetCategory('eye', importedEyeAssets),
+            processAssetCategory('mouth', importedMouthAssets)
           ]);
           
-          // Update state with core assets
+          // Update state with core assets (deduplicated)
           setAssets(prev => ({
             ...prev,
-            bg: [...prev.bg, ...moreBgs],
-            body: [...prev.body, ...moreBodies],
-            eye: basicEyes,
-            mouth: basicMouths
+            bg: deduplicateAssets([...prev.bg, ...moreBgs]),
+            body: deduplicateAssets([...prev.body, ...moreBodies]),
+            eye: deduplicateAssets(allEyes),
+            mouth: deduplicateAssets(allMouths)
           }));
         };
         
         // PHASE 3: Load secondary assets in the background
         const loadSecondaryAssets = async () => {
+          // Load all hats and costumes to ensure proper detection
           const [basicHats, basicCostumes] = await Promise.all([
-            processAssetCategory('hat', importedHatAssets.slice(0, 5)),
-            processAssetCategory('costume', importedCostumeAssets.slice(0, 3))
+            processAssetCategory('hat', importedHatAssets),
+            processAssetCategory('costume', importedCostumeAssets)
           ]);
           
-          // Update state with secondary assets
+          // Update state with secondary assets (deduplicated)
           setAssets(prev => ({
             ...prev,
-            hat: basicHats,
-            costume: basicCostumes
+            hat: deduplicateAssets(basicHats),
+            costume: deduplicateAssets(basicCostumes)
           }));
         };
         
-        // PHASE 4: Load remaining assets with very low priority
+        // We've loaded all assets in PHASE 2 and PHASE 3, so we don't need PHASE 4 anymore
         const loadRemainingAssets = async () => {
-          // Load remaining assets in small chunks to avoid overwhelming the network
-          const loadChunk = async (category: AssetCategory, assets: Asset[], startIndex: number, chunkSize: number) => {
-            if (startIndex >= assets.length) return [];
-            
-            const endIndex = Math.min(startIndex + chunkSize, assets.length);
-            return processAssetCategory(category, assets.slice(startIndex, endIndex));
-          };
-          
-          // Load remaining backgrounds
-          if (importedBgAssets.length > 8) {
-            const remainingBgs = await loadChunk('bg', importedBgAssets, 8, 5);
-            setAssets(prev => ({
-              ...prev,
-              bg: [...prev.bg, ...remainingBgs]
-            }));
-          }
-          
-          // Load remaining eyes
-          if (importedEyeAssets.length > 5) {
-            const remainingEyes = await loadChunk('eye', importedEyeAssets, 5, 5);
-            setAssets(prev => ({
-              ...prev,
-              eye: [...prev.eye, ...remainingEyes]
-            }));
-          }
-          
-          // Load remaining mouths
-          if (importedMouthAssets.length > 5) {
-            const remainingMouths = await loadChunk('mouth', importedMouthAssets, 5, 5);
-            setAssets(prev => ({
-              ...prev,
-              mouth: [...prev.mouth, ...remainingMouths]
-            }));
-          }
-          
-          // Load remaining hats
-          if (importedHatAssets.length > 5) {
-            const remainingHats = await loadChunk('hat', importedHatAssets, 5, 5);
-            setAssets(prev => ({
-              ...prev,
-              hat: [...prev.hat, ...remainingHats]
-            }));
-          }
-          
-          // Load remaining costumes
-          if (importedCostumeAssets.length > 3) {
-            const remainingCostumes = await loadChunk('costume', importedCostumeAssets, 3, 5);
-            setAssets(prev => ({
-              ...prev,
-              costume: [...prev.costume, ...remainingCostumes]
-            }));
-          }
+          // All assets are already loaded in previous phases
+          console.log('All assets loaded in previous phases');
         };
         
         // Execute phases in sequence with delays to prioritize UI responsiveness
@@ -418,11 +388,12 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
     
     loadAssets();
     
-    // Safety timeout - ensure loading state is turned off after 3 seconds no matter what
-    // Reduced from 5 seconds to 3 seconds for faster initial display
+    // Safety timeout - ensure loading state is turned off almost immediately
+    // Show UI right away and continue loading assets in background
     const safetyTimeout = setTimeout(() => {
       setIsLoading(false);
-    }, 3000);
+      setEssentialAssetsLoaded(true);
+    }, 500);
     
     return () => clearTimeout(safetyTimeout);
   }, [randomizeOnMount]);
