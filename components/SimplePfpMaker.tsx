@@ -122,91 +122,309 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
     const loadAssets = async () => {
       setIsLoading(true);
       try {
-        // Load all assets in parallel
-        const loadCategoryAssets = async (category: AssetCategory, assetList: Asset[]) => {
-          // Preload images
-          const loadedAssets = await Promise.all(
-            assetList.map(async (asset) => {
-              if (!asset.url) {
-                return asset; // Skip empty URLs (like 'None' options)
-              }
-              
-              return new Promise<Asset>((resolve) => {
-                const img = new Image();
-                img.crossOrigin = 'anonymous';
-                img.onload = () => {
-                  // Add the image to the asset for later use
-                  const assetWithImg = { ...asset, img };
-                  resolve(assetWithImg);
-                };
-                img.onerror = () => {
-                  console.error(`Failed to load asset: ${asset.url}`);
-                  resolve(asset); // Resolve anyway to prevent blocking
-                };
-                img.src = asset.url;
-              });
-            })
-          );
+        // Create a data URI for a transparent placeholder
+        const transparentPlaceholder = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="%23FFFFFF" fill-opacity="0"/></svg>';
+        
+        // Global asset cache to prevent duplicate loading
+        const assetCache = new Map<string, HTMLImageElement>();
+        
+        // Check browser storage for previously loaded assets
+        const checkCachedAsset = (url: string): HTMLImageElement | null => {
+          // Skip for data URLs - they're already fast
+          if (url.startsWith('data:')) return null;
           
-          return loadedAssets;
+          // Check memory cache first
+          if (assetCache.has(url)) {
+            return assetCache.get(url) || null;
+          }
+          
+          return null;
         };
         
-        // Load all categories in parallel
-        const [bgAssets, bodyAssets, eyeAssets, mouthAssets, hatAssets, costumeAssets] = await Promise.all([
-          loadCategoryAssets('bg', importedBgAssets),
-          loadCategoryAssets('body', importedBodyAssets),
-          loadCategoryAssets('eye', importedEyeAssets),
-          loadCategoryAssets('mouth', importedMouthAssets),
-          loadCategoryAssets('hat', importedHatAssets),
-          loadCategoryAssets('costume', importedCostumeAssets)
-        ]);
-        
-        // Preload hat back images
-        for (const hatAsset of hatAssets) {
-          if (hatAsset.backUrl) {
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.onload = () => {
-              hatAsset.backImg = img;
-            };
-            img.onerror = () => {
-              console.error(`Failed to load hat back image: ${hatAsset.backUrl}`);
-            };
-            img.src = hatAsset.backUrl;
+        // Optimize Cloudinary URLs for faster loading
+        const optimizeCloudinaryUrl = (url: string): string => {
+          if (!url.includes('cloudinary.com')) return url;
+          
+          // Add quality and format optimization parameters
+          // q_auto:good - good quality with compression
+          // f_auto - automatic format selection based on browser
+          // w_500 - resize to 500px width (enough for our canvas)
+          try {
+            const urlObj = new URL(url);
+            const pathParts = urlObj.pathname.split('/');
+            
+            // Check if transformation parameters already exist
+            const hasTransformations = pathParts.some(part => part.startsWith('q_') || part.startsWith('f_') || part.startsWith('w_'));
+            
+            if (!hasTransformations) {
+              // Find the upload part of the path and insert optimizations after it
+              const uploadIndex = pathParts.findIndex(part => part === 'upload');
+              if (uploadIndex !== -1) {
+                pathParts.splice(uploadIndex + 1, 0, 'q_auto:good,f_auto,w_500');
+                urlObj.pathname = pathParts.join('/');
+                return urlObj.toString();
+              }
+            }
+          } catch (e) {
+            // If URL parsing fails, return original URL
+            console.warn('Failed to optimize Cloudinary URL:', url);
           }
-        }
+          
+          return url;
+        };
         
-        // Update state with loaded assets
-        setAssets({
-          bg: bgAssets,
-          body: bodyAssets,
-          eye: eyeAssets,
-          mouth: mouthAssets,
-          hat: hatAssets,
-          costume: costumeAssets
+        // Load a single image with timeout
+        const loadSingleImage = async (url: string, timeout = 2000): Promise<HTMLImageElement> => {
+          // Check cache first
+          const cachedImg = checkCachedAsset(url);
+          if (cachedImg) return cachedImg;
+          
+          // Optimize URL if it's a Cloudinary URL
+          const optimizedUrl = optimizeCloudinaryUrl(url);
+          
+          try {
+            const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+              const img = new Image();
+              img.crossOrigin = 'anonymous';
+              
+              const timeoutId = setTimeout(() => {
+                reject(new Error(`Timeout loading: ${optimizedUrl}`));
+              }, timeout);
+              
+              img.onload = () => {
+                clearTimeout(timeoutId);
+                // Cache the successfully loaded image
+                assetCache.set(url, img);
+                resolve(img);
+              };
+              
+              img.onerror = () => {
+                clearTimeout(timeoutId);
+                reject(new Error(`Failed to load: ${optimizedUrl}`));
+              };
+              
+              img.src = optimizedUrl;
+            });
+            
+            return img;
+          } catch (error) {
+            console.warn(`Asset load error: ${error}`);
+            // Return transparent placeholder on error
+            const placeholder = new Image();
+            placeholder.src = transparentPlaceholder;
+            return placeholder;
+          }
+        };
+        
+        // Process a category of assets efficiently
+        const processAssetCategory = async (category: AssetCategory, assets: Asset[], limit?: number): Promise<Asset[]> => {
+          // If limit is provided, only process that many assets
+          const assetsToProcess = limit ? assets.slice(0, limit) : assets;
+          
+          // For data URI backgrounds, process immediately without network requests
+          if (category === 'bg') {
+            const dataUriAssets = assetsToProcess.filter(asset => asset.url.startsWith('data:'));
+            if (dataUriAssets.length > 0) {
+              dataUriAssets.forEach(asset => {
+                const img = new Image();
+                img.src = asset.url;
+                asset.img = img;
+              });
+            }
+          }
+          
+          // Process remaining assets that need network requests
+          const networkAssets = assetsToProcess.filter(asset => !asset.url.startsWith('data:') || !asset.img);
+          
+          // Use a small concurrency limit to avoid overwhelming the network
+          const concurrencyLimit = 3;
+          const results: Asset[] = [...assetsToProcess];
+          
+          // Process in small batches with limited concurrency
+          for (let i = 0; i < networkAssets.length; i += concurrencyLimit) {
+            const batch = networkAssets.slice(i, i + concurrencyLimit);
+            
+            await Promise.all(batch.map(async (asset) => {
+              if (!asset.url) return;
+              
+              try {
+                // Find the index in the original array
+                const assetIndex = assetsToProcess.findIndex(a => a.name === asset.name);
+                if (assetIndex === -1) return;
+                
+                // Load the image
+                const img = await loadSingleImage(asset.url);
+                results[assetIndex] = { ...asset, img };
+                
+                // If this asset has a back URL, load it in the background
+                if (asset.backUrl) {
+                  loadSingleImage(asset.backUrl).then(backImg => {
+                    results[assetIndex].backImg = backImg;
+                    // Force a re-render when back image loads
+                    setAssets(prev => ({ ...prev }));
+                  }).catch(() => {});
+                }
+              } catch (error) {
+                // On error, use placeholder
+                const assetIndex = assetsToProcess.findIndex(a => a.name === asset.name);
+                if (assetIndex !== -1) {
+                  const placeholder = new Image();
+                  placeholder.src = transparentPlaceholder;
+                  results[assetIndex] = { ...asset, img: placeholder };
+                }
+              }
+            }));
+            
+            // Small delay between batches
+            if (i + concurrencyLimit < networkAssets.length) {
+              await new Promise(resolve => setTimeout(resolve, 50));
+            }
+          }
+          
+          return results;
+        };
+        
+        // PHASE 1: Load minimal essential assets to show something immediately
+        const essentialBgs = await processAssetCategory('bg', importedBgAssets, 3);
+        const essentialBodies = await processAssetCategory('body', importedBodyAssets, 2);
+        
+        // Update state with essential assets and turn off loading spinner
+        setAssets(prev => ({
+          ...prev,
+          bg: essentialBgs,
+          body: essentialBodies
+        }));
+        
+        // Turn off loading state as soon as we have the minimal essentials
+        setIsLoading(false);
+        
+        // PHASE 2: Load core assets needed for basic functionality
+        const loadCoreAssets = async () => {
+          const [moreBgs, moreBodies, basicEyes, basicMouths] = await Promise.all([
+            processAssetCategory('bg', importedBgAssets.slice(3, 8)),
+            processAssetCategory('body', importedBodyAssets.slice(2)),
+            processAssetCategory('eye', importedEyeAssets.slice(0, 5)),
+            processAssetCategory('mouth', importedMouthAssets.slice(0, 5))
+          ]);
+          
+          // Update state with core assets
+          setAssets(prev => ({
+            ...prev,
+            bg: [...prev.bg, ...moreBgs],
+            body: [...prev.body, ...moreBodies],
+            eye: basicEyes,
+            mouth: basicMouths
+          }));
+        };
+        
+        // PHASE 3: Load secondary assets in the background
+        const loadSecondaryAssets = async () => {
+          const [basicHats, basicCostumes] = await Promise.all([
+            processAssetCategory('hat', importedHatAssets.slice(0, 5)),
+            processAssetCategory('costume', importedCostumeAssets.slice(0, 3))
+          ]);
+          
+          // Update state with secondary assets
+          setAssets(prev => ({
+            ...prev,
+            hat: basicHats,
+            costume: basicCostumes
+          }));
+        };
+        
+        // PHASE 4: Load remaining assets with very low priority
+        const loadRemainingAssets = async () => {
+          // Load remaining assets in small chunks to avoid overwhelming the network
+          const loadChunk = async (category: AssetCategory, assets: Asset[], startIndex: number, chunkSize: number) => {
+            if (startIndex >= assets.length) return [];
+            
+            const endIndex = Math.min(startIndex + chunkSize, assets.length);
+            return processAssetCategory(category, assets.slice(startIndex, endIndex));
+          };
+          
+          // Load remaining backgrounds
+          if (importedBgAssets.length > 8) {
+            const remainingBgs = await loadChunk('bg', importedBgAssets, 8, 5);
+            setAssets(prev => ({
+              ...prev,
+              bg: [...prev.bg, ...remainingBgs]
+            }));
+          }
+          
+          // Load remaining eyes
+          if (importedEyeAssets.length > 5) {
+            const remainingEyes = await loadChunk('eye', importedEyeAssets, 5, 5);
+            setAssets(prev => ({
+              ...prev,
+              eye: [...prev.eye, ...remainingEyes]
+            }));
+          }
+          
+          // Load remaining mouths
+          if (importedMouthAssets.length > 5) {
+            const remainingMouths = await loadChunk('mouth', importedMouthAssets, 5, 5);
+            setAssets(prev => ({
+              ...prev,
+              mouth: [...prev.mouth, ...remainingMouths]
+            }));
+          }
+          
+          // Load remaining hats
+          if (importedHatAssets.length > 5) {
+            const remainingHats = await loadChunk('hat', importedHatAssets, 5, 5);
+            setAssets(prev => ({
+              ...prev,
+              hat: [...prev.hat, ...remainingHats]
+            }));
+          }
+          
+          // Load remaining costumes
+          if (importedCostumeAssets.length > 3) {
+            const remainingCostumes = await loadChunk('costume', importedCostumeAssets, 3, 5);
+            setAssets(prev => ({
+              ...prev,
+              costume: [...prev.costume, ...remainingCostumes]
+            }));
+          }
+        };
+        
+        // Execute phases in sequence with delays to prioritize UI responsiveness
+        loadCoreAssets().then(() => {
+          setTimeout(() => {
+            loadSecondaryAssets().then(() => {
+              setTimeout(loadRemainingAssets, 1000);
+            });
+          }, 500);
         });
         
-        // Randomize if requested
+        // Randomize if requested - use only the initially loaded assets
         if (randomizeOnMount) {
           const newSelections = {
-            bg: Math.floor(Math.random() * bgAssets.length),
-            body: Math.floor(Math.random() * bodyAssets.length),
-            eye: Math.floor(Math.random() * eyeAssets.length),
-            mouth: Math.floor(Math.random() * mouthAssets.length),
-            hat: Math.floor(Math.random() * hatAssets.length),
-            costume: Math.floor(Math.random() * costumeAssets.length)
+            bg: Math.floor(Math.random() * Math.min(3, essentialBgs.length)),
+            body: Math.floor(Math.random() * Math.min(2, essentialBodies.length)),
+            eye: 0,
+            mouth: 0,
+            hat: 0,
+            costume: 0
           };
           setSelections(newSelections);
         }
-        
-        setIsLoading(false);
       } catch (error) {
         console.error('Error loading assets:', error);
+        // Even on error, turn off loading state and show what we have
         setIsLoading(false);
       }
     };
     
     loadAssets();
+    
+    // Safety timeout - ensure loading state is turned off after 3 seconds no matter what
+    // Reduced from 5 seconds to 3 seconds for faster initial display
+    const safetyTimeout = setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
+    
+    return () => clearTimeout(safetyTimeout);
   }, [randomizeOnMount]);
 
   // Draw the current selection on the canvas
@@ -635,7 +853,8 @@ const renderActionButton = (label: string, onClick: () => void, bgColor: string)
           <div className="relative w-16 h-16 mb-4">
             <div className="animate-spin absolute inset-0 border-4 border-t-amber-500 border-amber-200 rounded-full"></div>
           </div>
-          <p className="text-center text-sm">Loading assets...</p>
+          <p className="text-center text-sm">Preparing PFP maker...</p>
+          <p className="text-center text-xs mt-2 text-gray-500">Loading essential assets</p>
         </div>
       ) : (
         <div className="flex flex-col md:flex-row gap-8">
