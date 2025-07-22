@@ -96,6 +96,7 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
   
   // State for showing save notification
   const [showSaveNotification, setShowSaveNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
   
   // Loading state
   const [isLoading, setIsLoading] = useState(true);
@@ -697,14 +698,25 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
           console.error('Failed to copy X caption: ', err);
         });
       
-      // Open X (Twitter) in new tab with pre-filled caption
-      const encodedText = encodeURIComponent(PFP_X_CAPTION);
-      const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
-      window.open(twitterIntentUrl, '_blank');
-      
       // Show save notification
       setShowSaveNotification(true);
-      setTimeout(() => setShowSaveNotification(false), 2000);
+      
+      // Set a message indicating redirection
+      setNotificationMessage('PFP saved! Redirecting to Twitter in 2 seconds...');
+      
+      // Delay opening Twitter by 2 seconds
+      setTimeout(() => {
+        // Open X (Twitter) in new tab with pre-filled caption
+        const encodedText = encodeURIComponent(PFP_X_CAPTION);
+        const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
+        window.open(twitterIntentUrl, '_blank');
+        
+        // Hide notification after redirect
+        setTimeout(() => {
+          setShowSaveNotification(false);
+          setNotificationMessage('');
+        }, 1000);
+      }, 2000);
       
       // Call onSave callback if provided
       if (onSave) onSave(dataUrl);
@@ -740,47 +752,94 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
 
   // Helper function to render asset selector
   const renderAssetSelector = (category: AssetCategory) => {
-    const currentAssets = assets[category] || [];
-    const currentIndex = selections[category];
-    const currentAsset = currentAssets[currentIndex];
-    
-    return (
-      <div key={category} className="asset-selector bg-amber-200 border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:p-6">
-        <h3 className="asset-selector-title text-sm font-bold mb-2 capitalize">{category}</h3>
-        
-        <div className="asset-selector-controls flex items-center justify-between">
-          <button 
-            onClick={() => handleAssetChange(category, -1)}
-            className="asset-selector-button w-8 h-8 flex items-center justify-center bg-blue-500 text-white font-bold border-2 border-black hover:bg-blue-600 transition-colors"
-          >
-            &lt;
-          </button>
+    // For mobile view, use the simplified selector
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      const currentAssets = assets[category] || [];
+      const currentIndex = selections[category];
+      const currentAsset = currentAssets[currentIndex];
+      
+      return (
+        <div key={category} className="asset-selector bg-amber-200 border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <h3 className="asset-selector-title text-sm font-bold mb-2 capitalize">{category}</h3>
           
-          <div className="asset-name flex-1 text-center px-2 py-1 bg-amber-100 border-2 border-black mx-2 truncate">
-            {currentAsset ? currentAsset.name : 'Loading...'}
+          <div className="asset-selector-controls flex items-center justify-between">
+            <button 
+              onClick={() => handleAssetChange(category, -1)}
+              className="asset-selector-button w-8 h-8 flex items-center justify-center bg-blue-500 text-white font-bold border-2 border-black hover:bg-blue-600 transition-colors"
+            >
+              &lt;
+            </button>
+            
+            <div className="asset-name flex-1 text-center px-2 py-1 bg-amber-100 border-2 border-black mx-2 truncate">
+              {currentAsset ? currentAsset.name : 'Loading...'}
+            </div>
+            
+            <button 
+              onClick={() => handleAssetChange(category, 1)}
+              className="asset-selector-button w-8 h-8 flex items-center justify-center bg-blue-500 text-white font-bold border-2 border-black hover:bg-blue-600 transition-colors"
+            >
+              &gt;
+            </button>
           </div>
           
-          <button 
-            onClick={() => handleAssetChange(category, 1)}
-            className="asset-selector-button w-8 h-8 flex items-center justify-center bg-blue-500 text-white font-bold border-2 border-black hover:bg-blue-600 transition-colors"
-          >
-            &gt;
-          </button>
+          <div className="flex items-center justify-center mt-2">
+            <label className="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={equipped[category]}
+                onChange={() => handleEquipToggle(category)}
+              />
+              <div className={`w-9 h-5 bg-gray-200 rounded-full p-1 ${equipped[category] ? 'bg-blue-500' : ''}`}>
+                <div className={`w-4 h-4 rounded-full transition-all ${equipped[category] ? 'bg-white translate-x-4' : 'bg-gray-400'}`}></div>
+              </div>
+              <span className="ml-2 text-xs">Show</span>
+            </label>
+          </div>
+        </div>
+      );
+    }
+    
+    // For desktop view, use the original selector with dropdown
+    const categoryAssets = assets[category] || [];
+    const currentIndex = selections[category];
+    const isToggleable = category !== 'bg' && category !== 'body';
+    const isEquipped = isToggleable ? equipped[category as keyof EquippedState] : true;
+    
+    return (
+      <div key={category} className="asset-selector">
+        <div className="flex items-center mb-2">
+          <h3 className="text-sm font-bold uppercase tracking-wide">{category}</h3>
         </div>
         
-        <div className="flex items-center justify-center mt-2">
-          <label className="inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              className="sr-only"
-              checked={equipped[category]}
-              onChange={() => handleEquipToggle(category)}
-            />
-            <div className={`w-9 h-5 bg-gray-200 rounded-full p-1 ${equipped[category] ? 'bg-blue-500' : ''}`}>
-              <div className={`w-4 h-4 rounded-full transition-all ${equipped[category] ? 'bg-white translate-x-4' : 'bg-gray-400'}`}></div>
-            </div>
-            <span className="ml-2 text-xs">Show</span>
-          </label>
+        <div className="flex items-center">
+          <select
+            value={currentIndex}
+            onChange={(e) => handleAssetChange(category, parseInt(e.target.value))}
+            className="flex-1 px-2 py-1 border-4 border-black bg-white text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+            disabled={!isEquipped}
+          >
+            {categoryAssets.map((asset, index) => (
+              <option key={index} value={index}>
+                {asset.name}
+              </option>
+            ))}
+          </select>
+          
+          {isToggleable && (
+            <button
+              onClick={() => handleEquipToggle(category as keyof EquippedState)}
+              className={`ml-2 px-2 py-1 border-4 border-black text-xs font-bold flex items-center ${
+                isEquipped 
+                  ? 'bg-orange-500 text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' 
+                  : 'bg-gray-300 text-gray-600'
+              }`}
+              title={isEquipped ? "Unequip" : "Equip"}
+              aria-label={isEquipped ? `Unequip ${category}` : `Equip ${category}`}
+            >
+              {isEquipped ? "✓" : "✗"}
+            </button>
+          )}
         </div>
       </div>
     );
@@ -837,16 +896,16 @@ const renderActionButton = (label: string, onClick: () => void, bgColor: string)
           <p className="text-center text-xs mt-2 text-gray-500">Loading essential assets</p>
         </div>
       ) : (
-        <div className="flex flex-col md:flex-row gap-4 md:gap-8">
+        <div className="flex flex-col md:flex-row gap-8">
           {/* Canvas - responsive container with fixed dimensions on desktop */}
           <div className="w-full md:w-[500px] flex-shrink-0">
             <PfpCanvas canvasRef={canvasRef} width={width} />
           </div>
           
-          {/* Controls - optimized for mobile with compact layout */}
-          <div className="pfp-controls flex-1 space-y-3 md:space-y-4 bg-amber-100 p-2 sm:p-3 md:p-4 overflow-y-auto max-h-[60vh] sm:max-h-[65vh] md:max-h-[500px] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] pb-[80px] md:pb-[90px]">
-            {/* Mobile tabs for categories on small screens */}
-            <div className="block sm:hidden mb-2">
+          {/* Mobile view */}
+          <div className="block sm:hidden pfp-controls flex-1 space-y-3 bg-amber-100 p-2 overflow-y-auto max-h-[60vh] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] pb-[80px]">
+            {/* Mobile tabs for categories */}
+            <div className="mb-2">
               <div className="flex overflow-x-auto pb-2 hide-scrollbar">
                 {(['bg', 'body', 'eye', 'mouth', 'hat', 'costume'] as AssetCategory[]).map((category) => (
                   <button 
@@ -865,13 +924,22 @@ const renderActionButton = (label: string, onClick: () => void, bgColor: string)
               </div>
             </div>
             
-            {/* Regular grid layout on larger screens */}
-            <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+            {/* Mobile Action Buttons */}
+            <div className="flex flex-wrap justify-center gap-2 mt-4 pb-4 sticky bottom-0 pt-3 border-t-4 border-black z-20 bg-amber-100">
+              {renderActionButton('Randomize', handleRandomize, 'bg-blue-500')}
+              {renderActionButton('Save PFP', handleSave, 'bg-orange-500')}
+            </div>
+          </div>
+          
+          {/* Desktop view - original UI */}
+          <div className="hidden sm:block pfp-controls flex-1 space-y-4 bg-amber-100 p-4 overflow-y-auto max-h-[70vh] md:max-h-[500px] border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] pb-[90px]">
+            {/* Asset Selection */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {(['bg', 'body', 'eye', 'mouth', 'hat', 'costume'] as AssetCategory[]).map(renderAssetSelector)}
             </div>
             
-            {/* Action Buttons - more compact on mobile */}
-            <div className="flex flex-wrap justify-center gap-2 md:gap-3 mt-4 md:mt-6 pb-4 md:pb-6 sticky bottom-0 pt-3 md:pt-4 border-t-4 border-black z-20 bg-amber-100">
+            {/* Action Buttons */}
+            <div className="flex flex-wrap justify-center gap-3 mt-6 pb-6 sticky bottom-0 pt-4 border-t-4 border-black z-20">
               {renderActionButton('Randomize', handleRandomize, 'bg-blue-500')}
               {renderActionButton('Save PFP', handleSave, 'bg-orange-500')}
             </div>
@@ -882,7 +950,7 @@ const renderActionButton = (label: string, onClick: () => void, bgColor: string)
       {/* Save Notification */}
       <SaveNotification 
         isVisible={showSaveNotification} 
-        message="PFP Saved Successfully!" 
+        message={notificationMessage || "PFP Saved Successfully!"} 
       />
     </div>
   );

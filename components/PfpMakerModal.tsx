@@ -129,7 +129,7 @@ const PfpMakerModal: React.FC<PfpMakerModalProps> = ({
                   exit={{ scale: 0.9, opacity: 0 }}
                   transition={{ type: "spring", damping: 20, stiffness: 300 }}
                   onClick={(e) => e.stopPropagation()}
-                  className="relative overflow-hidden max-h-[95vh] sm:max-h-[90vh] w-full max-w-[98vw] sm:max-w-[95vw] md:max-w-[90vw] lg:max-w-[1100px] bg-amber-500 border-4 border-black rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+                  className="relative overflow-hidden max-h-[90vh] w-full max-w-[95vw] md:max-w-[90vw] lg:max-w-[1100px] bg-amber-500 border-4 border-black rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
                   style={{ fontFamily: 'var(--font-press-start)' }}
                 >
                   {/* Modal structure with header */}
