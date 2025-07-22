@@ -15,6 +15,8 @@ interface Asset {
 }
 
 interface EquippedState {
+  bg: boolean;
+  body: boolean;
   eye: boolean;
   mouth: boolean;
   hat: boolean;
@@ -22,7 +24,9 @@ interface EquippedState {
 }
 
 type AssetMap = Record<AssetCategory, Asset[]>;
-type SelectionMap = Record<AssetCategory, number>;
+type SelectionMap = Record<AssetCategory, number> & {
+  activeTab?: AssetCategory;
+};
 
 interface SimplePfpMakerProps {
   width?: number;
@@ -76,11 +80,14 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
     eye: 0,
     hat: 0,
     mouth: 0,
-    costume: 0
+    costume: 0,
+    activeTab: 'bg' // Default active tab for mobile view
   });
 
   // State for equipped (visible) elements
   const [equipped, setEquipped] = useState<EquippedState>({
+    bg: true,
+    body: true,
     eye: true,
     mouth: true,
     hat: true,
@@ -277,7 +284,7 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
                   loadSingleImage(asset.backUrl).then(backImg => {
                     results[assetIndex].backImg = backImg;
                     // Force a re-render when back image loads
-                    setAssets(prev => ({ ...prev }));
+                    setAssets((prev: AssetMap) => ({ ...prev }));
                   }).catch(() => {});
                 }
               } catch (error) {
@@ -733,45 +740,47 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
 
   // Helper function to render asset selector
   const renderAssetSelector = (category: AssetCategory) => {
-    const categoryAssets = assets[category] || [];
+    const currentAssets = assets[category] || [];
     const currentIndex = selections[category];
-    const isToggleable = category !== 'bg' && category !== 'body';
-    const isEquipped = isToggleable ? equipped[category as keyof EquippedState] : true;
+    const currentAsset = currentAssets[currentIndex];
     
     return (
-      <div key={category} className="asset-selector">
-        <div className="flex items-center mb-2">
-          <h3 className="text-sm font-bold uppercase tracking-wide">{category}</h3>
+      <div key={category} className="asset-selector bg-amber-200 border-4 border-black p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:p-6">
+        <h3 className="asset-selector-title text-sm font-bold mb-2 capitalize">{category}</h3>
+        
+        <div className="asset-selector-controls flex items-center justify-between">
+          <button 
+            onClick={() => handleAssetChange(category, -1)}
+            className="asset-selector-button w-8 h-8 flex items-center justify-center bg-blue-500 text-white font-bold border-2 border-black hover:bg-blue-600 transition-colors"
+          >
+            &lt;
+          </button>
+          
+          <div className="asset-name flex-1 text-center px-2 py-1 bg-amber-100 border-2 border-black mx-2 truncate">
+            {currentAsset ? currentAsset.name : 'Loading...'}
+          </div>
+          
+          <button 
+            onClick={() => handleAssetChange(category, 1)}
+            className="asset-selector-button w-8 h-8 flex items-center justify-center bg-blue-500 text-white font-bold border-2 border-black hover:bg-blue-600 transition-colors"
+          >
+            &gt;
+          </button>
         </div>
         
-        <div className="flex items-center">
-          <select
-            value={currentIndex}
-            onChange={(e) => handleAssetChange(category, parseInt(e.target.value))}
-            className="flex-1 px-2 py-1 border-4 border-black bg-white text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-            disabled={!isEquipped}
-          >
-            {categoryAssets.map((asset, index) => (
-              <option key={index} value={index}>
-                {asset.name}
-              </option>
-            ))}
-          </select>
-          
-          {isToggleable && (
-            <button
-              onClick={() => handleEquipToggle(category as keyof EquippedState)}
-              className={`ml-2 px-2 py-1 border-4 border-black text-xs font-bold flex items-center ${
-                isEquipped 
-                  ? 'bg-orange-500 text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' 
-                  : 'bg-gray-300 text-gray-600'
-              }`}
-              title={isEquipped ? "Unequip" : "Equip"}
-              aria-label={isEquipped ? `Unequip ${category}` : `Equip ${category}`}
-            >
-              {isEquipped ? "✓" : "✗"}
-            </button>
-          )}
+        <div className="flex items-center justify-center mt-2">
+          <label className="inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              className="sr-only"
+              checked={equipped[category]}
+              onChange={() => handleEquipToggle(category)}
+            />
+            <div className={`w-9 h-5 bg-gray-200 rounded-full p-1 ${equipped[category] ? 'bg-blue-500' : ''}`}>
+              <div className={`w-4 h-4 rounded-full transition-all ${equipped[category] ? 'bg-white translate-x-4' : 'bg-gray-400'}`}></div>
+            </div>
+            <span className="ml-2 text-xs">Show</span>
+          </label>
         </div>
       </div>
     );
@@ -828,21 +837,41 @@ const renderActionButton = (label: string, onClick: () => void, bgColor: string)
           <p className="text-center text-xs mt-2 text-gray-500">Loading essential assets</p>
         </div>
       ) : (
-        <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-8">
           {/* Canvas - responsive container with fixed dimensions on desktop */}
           <div className="w-full md:w-[500px] flex-shrink-0">
             <PfpCanvas canvasRef={canvasRef} width={width} />
           </div>
           
-          {/* Controls - with fixed height to match canvas */}
-          <div className="pfp-controls flex-1 space-y-4 bg-amber-100 p-4 overflow-y-auto max-h-[70vh] md:max-h-[500px] border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] pb-[90px]">
-            {/* Asset Selection */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Controls - optimized for mobile with compact layout */}
+          <div className="pfp-controls flex-1 space-y-3 md:space-y-4 bg-amber-100 p-2 sm:p-3 md:p-4 overflow-y-auto max-h-[60vh] sm:max-h-[65vh] md:max-h-[500px] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] pb-[80px] md:pb-[90px]">
+            {/* Mobile tabs for categories on small screens */}
+            <div className="block sm:hidden mb-2">
+              <div className="flex overflow-x-auto pb-2 hide-scrollbar">
+                {(['bg', 'body', 'eye', 'mouth', 'hat', 'costume'] as AssetCategory[]).map((category) => (
+                  <button 
+                    key={`tab-${category}`}
+                    className={`px-3 py-1 text-xs whitespace-nowrap mr-2 last:mr-0 border-2 border-black ${selections.activeTab === category ? 'bg-blue-500 text-white' : 'bg-amber-200'}`}
+                    onClick={() => setSelections(prev => ({ ...prev, activeTab: category as AssetCategory }))}
+                  >
+                    {category.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+              
+              {/* Show only active category on mobile */}
+              <div className="mt-2">
+                {renderAssetSelector(selections.activeTab || 'bg')}
+              </div>
+            </div>
+            
+            {/* Regular grid layout on larger screens */}
+            <div className="hidden sm:grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
               {(['bg', 'body', 'eye', 'mouth', 'hat', 'costume'] as AssetCategory[]).map(renderAssetSelector)}
             </div>
             
-            {/* Action Buttons */}
-            <div className="flex flex-wrap justify-center gap-3 mt-6 pb-6 sticky bottom-0 pt-4 border-t-4 border-black z-20">
+            {/* Action Buttons - more compact on mobile */}
+            <div className="flex flex-wrap justify-center gap-2 md:gap-3 mt-4 md:mt-6 pb-4 md:pb-6 sticky bottom-0 pt-3 md:pt-4 border-t-4 border-black z-20 bg-amber-100">
               {renderActionButton('Randomize', handleRandomize, 'bg-blue-500')}
               {renderActionButton('Save PFP', handleSave, 'bg-orange-500')}
             </div>

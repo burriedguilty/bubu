@@ -1,0 +1,44 @@
+/* Mobile optimizations for PFP Maker */
+
+/* Hide scrollbar but keep functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
+/* Compact asset selectors for mobile */
+@media (max-width: 640px) {
+  .mobile-optimized .asset-selector {
+    padding: 0.5rem !important;
+  }
+  
+  .mobile-optimized .asset-selector-title {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+  
+  .mobile-optimized .asset-selector-controls {
+    gap: 0.25rem !important;
+  }
+  
+  .mobile-optimized .asset-selector-button {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    font-size: 0.7rem !important;
+  }
+  
+  .mobile-optimized .asset-name {
+    font-size: 0.7rem !important;
+    padding: 0.25rem !important;
+  }
+}
+
+/* Sticky action buttons that stay visible */
+.mobile-optimized .action-buttons {
+  background-color: rgba(252, 211, 77, 0.95);
+  backdrop-filter: blur(4px);
+}

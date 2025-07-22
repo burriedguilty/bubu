@@ -129,7 +129,7 @@ const PfpMakerModal: React.FC<PfpMakerModalProps> = ({
                   exit={{ scale: 0.9, opacity: 0 }}
                   transition={{ type: "spring", damping: 20, stiffness: 300 }}
                   onClick={(e) => e.stopPropagation()}
-                  className="relative overflow-hidden max-h-[90vh] w-full max-w-[95vw] md:max-w-[90vw] lg:max-w-[1100px] bg-amber-500 border-4 border-black rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+                  className="relative overflow-hidden max-h-[95vh] sm:max-h-[90vh] w-full max-w-[98vw] sm:max-w-[95vw] md:max-w-[90vw] lg:max-w-[1100px] bg-amber-500 border-4 border-black rounded-none shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
                   style={{ fontFamily: 'var(--font-press-start)' }}
                 >
                   {/* Modal structure with header */}
@@ -140,31 +140,31 @@ const PfpMakerModal: React.FC<PfpMakerModalProps> = ({
                       style={{
                         backgroundImage: 'linear-gradient(to bottom, #3b82f6, #2563eb)',
                         boxShadow: 'inset 0 -4px 0 #1d4ed8, inset 0 4px 0 #60a5fa',
-                        padding: '12px 0'
+                        padding: screenWidth < 640 ? '8px 0' : '12px 0'
                       }}
                     >
-                      <h2 className="text-2xl font-bold text-center text-white" style={{ 
+                      <h2 className={`${screenWidth < 640 ? 'text-xl' : 'text-2xl'} font-bold text-center text-white`} style={{ 
                         fontFamily: 'var(--font-press-start)', 
                         textShadow: '2px 2px 0 #000, -1px -1px 0 #93c5fd'
                       }}>Create Your PFP</h2>
                     </div>
                     
-                    {/* Close button */}
+                    {/* Close button - smaller on mobile */}
                     <button 
                       onClick={handleClose}
-                      className="absolute top-2 right-2 w-10 h-10 flex items-center justify-center bg-orange-500 text-white font-bold border-3 border-black hover:bg-orange-600 transition-colors shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 z-10"
-                      style={{ fontSize: '16px' }}
+                      className={`absolute ${screenWidth < 640 ? 'top-1 right-1 w-8 h-8' : 'top-2 right-2 w-10 h-10'} flex items-center justify-center bg-orange-500 text-white font-bold border-3 border-black hover:bg-orange-600 transition-colors shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 z-10`}
+                      style={{ fontSize: screenWidth < 640 ? '14px' : '16px' }}
                     >
                       X
                     </button>
 
-                    {/* Content area */}
-                    <div className="flex-grow overflow-y-auto p-2 sm:p-4 md:p-6">
+                    {/* Content area - optimized padding for mobile */}
+                    <div className="flex-grow overflow-y-auto p-1 xs:p-2 sm:p-4 md:p-6">
                       <div className="w-full">
                         <SimplePfpMaker 
                           ref={pfpMakerRef}
-                          className="w-full"
-                          width={screenWidth >= 768 ? 500 : 300} /* Use 500px on desktop as per user preference */
+                          className="w-full mobile-optimized"
+                          width={screenWidth >= 768 ? 500 : (screenWidth >= 640 ? 300 : 260)} /* Smaller canvas on mobile */
                           onSave={handleSave}
                           randomizeOnMount={true}
                         />
