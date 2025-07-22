@@ -646,11 +646,32 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
   }, [assets, selections, equipped, width]);
 
   // Handle asset selection changes
-  const handleAssetChange = (category: AssetCategory, index: number) => {
-    setSelections((prev: SelectionMap) => ({
-      ...prev,
-      [category]: index
-    }));
+  const handleAssetChange = (category: AssetCategory, index: number | string) => {
+    setSelections((prev: SelectionMap) => {
+      const currentAssets = assets[category] || [];
+      const currentIndex = prev[category] || 0;
+      
+      // If index is a number, use it directly (for dropdown selection)
+      if (typeof index === 'number') {
+        return {
+          ...prev,
+          [category]: index
+        };
+      }
+      
+      // If index is 'next' or 'prev', calculate the new index
+      let newIndex = currentIndex;
+      if (index === 'next') {
+        newIndex = (currentIndex + 1) % currentAssets.length;
+      } else if (index === 'prev') {
+        newIndex = (currentIndex - 1 + currentAssets.length) % currentAssets.length;
+      }
+      
+      return {
+        ...prev,
+        [category]: newIndex
+      };
+    });
   };
   
   // Handle equip/unequip toggle
@@ -764,7 +785,7 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
           
           <div className="asset-selector-controls flex items-center justify-between">
             <button 
-              onClick={() => handleAssetChange(category, -1)}
+              onClick={() => handleAssetChange(category, 'prev')}
               className="asset-selector-button w-8 h-8 flex items-center justify-center bg-blue-500 text-white font-bold border-2 border-black hover:bg-blue-600 transition-colors"
             >
               &lt;
@@ -775,7 +796,7 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
             </div>
             
             <button 
-              onClick={() => handleAssetChange(category, 1)}
+              onClick={() => handleAssetChange(category, 'next')}
               className="asset-selector-button w-8 h-8 flex items-center justify-center bg-blue-500 text-white font-bold border-2 border-black hover:bg-blue-600 transition-colors"
             >
               &gt;
@@ -790,7 +811,7 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
                 checked={equipped[category]}
                 onChange={() => handleEquipToggle(category)}
               />
-              <div className={`w-9 h-5 bg-gray-200 rounded-full p-1 ${equipped[category] ? 'bg-blue-500' : ''}`}>
+              <div className={`w-9 h-5 rounded-full p-1 ${equipped[category] ? 'bg-amber-500' : 'bg-gray-200'}`}>
                 <div className={`w-4 h-4 rounded-full transition-all ${equipped[category] ? 'bg-white translate-x-4' : 'bg-gray-400'}`}></div>
               </div>
               <span className="ml-2 text-xs">Show</span>
@@ -831,7 +852,7 @@ const SimplePfpMaker = forwardRef<SimplePfpMakerRef, SimplePfpMakerProps>(({
               onClick={() => handleEquipToggle(category as keyof EquippedState)}
               className={`ml-2 px-2 py-1 border-4 border-black text-xs font-bold flex items-center ${
                 isEquipped 
-                  ? 'bg-orange-500 text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' 
+                  ? 'bg-amber-500 text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' 
                   : 'bg-gray-300 text-gray-600'
               }`}
               title={isEquipped ? "Unequip" : "Equip"}
